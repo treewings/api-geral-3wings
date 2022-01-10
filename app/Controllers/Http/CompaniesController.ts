@@ -1,5 +1,8 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
+// Models
+import CompanyModel from 'App/Models/Company'
+
 export default class CompaniesController {
   public async index({}: HttpContextContract) {}
 
@@ -7,7 +10,10 @@ export default class CompaniesController {
 
   public async store({}: HttpContextContract) {}
 
-  public async show({}: HttpContextContract) {}
+  public async show(id: any) {
+    const data = await CompanyModel.find(id)
+    return data
+  }
 
   public async edit({}: HttpContextContract) {}
 

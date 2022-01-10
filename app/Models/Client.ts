@@ -12,8 +12,8 @@ export default class Client extends BaseModel {
   public i_code: string
 
   @column()
-  public company_id: string
-  
+  public company_id: number
+
   @column()
   public name: string
 

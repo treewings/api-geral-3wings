@@ -20,6 +20,11 @@
 
 import Route from '@ioc:Adonis/Core/Route'
 
-Route.get('/', async () => {
-  return { hello: 'world' }
+Route.post('api/in/attendance', async (ctx) => {
+
+  const { default: MainController } = await import(
+    'App/Controllers/Http/api/MainController'
+  )
+
+  return new MainController().index(ctx)
 })

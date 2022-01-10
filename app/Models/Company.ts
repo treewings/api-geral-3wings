@@ -12,6 +12,9 @@ export default class Company extends BaseModel {
   public description: string
 
   @column()
+  public access_key: string
+
+  @column()
   public is_active: boolean
 
   @column.dateTime({ autoCreate: true })
