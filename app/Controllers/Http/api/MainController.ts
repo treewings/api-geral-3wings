@@ -3,6 +3,7 @@ import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 // Controllers
 import CompaniesController from 'App/Controllers/Http/CompaniesController'
 import ClientsController from 'App/Controllers/Http/ClientsController'
+import AttendancesController from 'App/Controllers/Http/AttendancesController'
 
 
 export default class MainController {
@@ -52,6 +53,7 @@ export default class MainController {
           tp_atendimento: type_attendance,
           dt_atendimento: start_date,
           hr_atendimento: start_hour,
+          nr_attendance: nr_attendance,
           dt_alta: end_date,
           origem: {
             cd_ori_ate: cd_origin,
@@ -94,7 +96,8 @@ export default class MainController {
 
       //#region store attendance
       if(returnClientStore){
-
+        const dataAttendance =
+          await new AttendancesController().show(nr_attendance)
       }
       //#endregion store attendance
 
