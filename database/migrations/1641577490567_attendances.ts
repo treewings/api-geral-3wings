@@ -11,8 +11,8 @@ export default class Attendances extends BaseSchema {
       table.string('type')
       table.timestamp('start_date')
       table.timestamp('end_date')
-      table.string('origin').nullable()
-      table.string('sector').nullable()
+      table.integer('origin_id').unsigned().references('id').inTable('origins')
+      table.integer('sector_id').unsigned().references('id').inTable('sectors')
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL
        */

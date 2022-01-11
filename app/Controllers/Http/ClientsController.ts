@@ -22,7 +22,7 @@ export default class ClientsController {
       phone_number: data.phone_number
     });
 
-    return iData.$isPersisted ? true : false;
+    return iData.$isPersisted ? iData : false;
   }
 
   public async show({}: HttpContextContract) {}

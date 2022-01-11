@@ -2,7 +2,9 @@ import { DateTime } from 'luxon'
 import { BaseModel, column, belongsTo, BelongsTo } from '@ioc:Adonis/Lucid/Orm'
 
 // #models
-import Client from 'App/Models/Client'
+import ClientModel from 'App/Models/Client'
+import OriginModel from 'App/Models/Origin'
+import SectorModel from 'App/Models/Sector'
 
 export default class Attendance extends BaseModel {
   @column({ isPrimary: true })
@@ -12,10 +14,10 @@ export default class Attendance extends BaseModel {
   public client_id: number
 
   @column()
-  public i_code: number
+  public i_code: string
 
   @column()
-  public type: number
+  public type: string
 
   @column()
   public start_date: DateTime
@@ -24,15 +26,25 @@ export default class Attendance extends BaseModel {
   public end_date: DateTime
 
   @column()
-  public origin: string
+  public origin_id: number
 
   @column()
-  public sector: string
+  public sector_id: number
 
-  @belongsTo(() => Client, {
-    foreignKey: 'company_id'
+  @belongsTo(() => ClientModel, {
+    foreignKey: 'client_id'
   })
-  public client: BelongsTo<typeof Client>
+  public client: BelongsTo<typeof ClientModel>
+
+  @belongsTo(() => OriginModel, {
+    foreignKey: 'origin_id'
+  })
+  public origin: BelongsTo<typeof OriginModel>
+
+  @belongsTo(() => SectorModel, {
+    foreignKey: 'sector_id'
+  })
+  public sector: BelongsTo<typeof SectorModel>
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
