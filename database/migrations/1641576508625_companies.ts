@@ -10,6 +10,8 @@ export default class Companies extends BaseSchema {
       table.string('description')
       table.string('access_key')
       table.boolean('is_active').defaultTo(true)
+      table.string('endpoint_attendance').nullable()
+      table.string('endpoint_tables').nullable()
 
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL

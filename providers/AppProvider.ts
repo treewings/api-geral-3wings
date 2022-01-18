@@ -1,4 +1,5 @@
 import { ApplicationContract } from '@ioc:Adonis/Core/Application'
+import cron from 'node-cron'
 
 export default class AppProvider {
   constructor (protected app: ApplicationContract) {
@@ -14,6 +15,15 @@ export default class AppProvider {
 
   public async ready () {
     // App is ready
+
+    // invoke controller for consume apis
+  
+    cron.schedule('* * * * * *', async () => {
+      const { default: GetDataController } = await import(
+        'App/Controllers/Http/services/GetDataController'
+      )
+      new GetDataController().index()
+    });
   }
 
   public async shutdown () {

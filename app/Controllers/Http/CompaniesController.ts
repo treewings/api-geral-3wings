@@ -15,6 +15,14 @@ export default class CompaniesController {
     return data
   }
 
+  public async list() {
+    const data = 
+      await CompanyModel
+        .query()
+        .where('is_active', true)
+    return data
+  }
+
   public async edit({}: HttpContextContract) {}
 
   public async update({}: HttpContextContract) {}

@@ -17,6 +17,12 @@ export default class Company extends BaseModel {
   @column()
   public is_active: boolean
 
+  @column()
+  public endpoint_attendance: string
+
+  @column()
+  public endpoint_tables: string
+
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
 

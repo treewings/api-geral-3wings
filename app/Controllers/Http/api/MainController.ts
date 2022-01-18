@@ -14,7 +14,7 @@ import HealthInsurancesController from 'App/Controllers/Http/HealthInsurancesCon
 export default class MainController {
   public async index({ request, response } :HttpContextContract) {
 
-    // try {
+  try {
 
 
     const { company, access_key } = request.headers()
@@ -342,17 +342,12 @@ export default class MainController {
           },
         });
         // #endregion return
-
+        //#endregion store attendance
       }
-
-    // } catch (error) {
-    //   return false;
-    // }
-      //#endregion store attendance
-
-      //#endregion body
-
-
+    //#endregion body
+  } catch (error) {
+    return false;
+  }
 
   }
 }
