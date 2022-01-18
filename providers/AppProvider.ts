@@ -17,8 +17,8 @@ export default class AppProvider {
     // App is ready
 
     // invoke controller for consume apis
-  
-    cron.schedule('* * * * * *', async () => {
+
+    cron.schedule('* * * * *', async () => {
       const { default: GetDataController } = await import(
         'App/Controllers/Http/services/GetDataController'
       )
