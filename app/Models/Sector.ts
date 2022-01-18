@@ -16,7 +16,10 @@ export default class Sector extends BaseModel {
 
   @column()
   public is_active: boolean
-  
+
+  @column()
+  public company_id: number
+
   @belongsTo(() => Company, {
     foreignKey: 'company_id'
   })

@@ -10,12 +10,12 @@ export default class InpatientUnits extends BaseSchema {
       table.integer('sector_id').unsigned().references('id').inTable('sectors')
       table.string('description')
       table.boolean('is_active').defaultTo(true)
-      
+
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL
        */
-      table.timestamp('created_at', { useTz: true })
-      table.timestamp('updated_at', { useTz: true })
+      table.timestamp('created_at', { useTz: true }).defaultTo(this.now())
+      table.timestamp('updated_at', { useTz: true }).defaultTo(this.now())
     })
   }
 

@@ -8,3 +8,9 @@ export interface IClientStore{
   is_vip: boolean;
   phone_number: string;
 }
+
+export interface IClientShow{
+  i_code: string;
+  company_id: number;
+}
+

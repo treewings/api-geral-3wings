@@ -4,7 +4,7 @@ import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import AttendanceModel from 'App/Models/Attendance'
 
 // Interfaces
-import { IAttendanceStore, IAttendanceEdit, IAttendanceShow } from 'App/Interfaces/IAttendance'
+import { IAttendanceStore, IAttendanceUpdate, IAttendanceShow } from 'App/Interfaces/IAttendance'
 
 export default class AttendancesController {
   public async index({}: HttpContextContract) {}
@@ -12,6 +12,9 @@ export default class AttendancesController {
   public async create({}: HttpContextContract) {}
 
   public async store(data: IAttendanceStore) {
+
+    console.log(data)
+
     const iData = await AttendanceModel.create({
      client_id: data.client_id,
      start_date: data.start_date,
@@ -22,16 +25,31 @@ export default class AttendancesController {
      type: data.type,
     });
 
-    return iData.$isPersisted ? true : false;
+    return iData.$isPersisted ? iData : false;
   }
 
   public async show(data: IAttendanceShow) {
-    const sData = await AttendanceModel.find(data.i_code)
-    return sData
+    const sData =
+    await AttendanceModel
+      .query()
+      .where('i_code', data.i_code)
+      .where('client_id', data.client_id)
+      .first()
+
+    return sData ? sData : false
   }
 
-  public async edit(data: IAttendanceEdit) {
-    const eData = await AttendanceModel.find(data.i_code)
+  public async edit() {
+
+  }
+
+  public async update(data: IAttendanceUpdate) {
+    const eData =
+      await AttendanceModel
+        .query()
+        .where('i_code', data.i_code)
+        .where('client_id', data.client_id)
+        .first();
 
     if (eData){
       eData.type        = data.type
@@ -47,8 +65,6 @@ export default class AttendancesController {
 
     return false
   }
-
-  public async update({}: HttpContextContract) {}
 
   public async destroy({}: HttpContextContract) {}
 }

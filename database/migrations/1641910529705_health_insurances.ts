@@ -13,10 +13,10 @@ export default class HealthInsurances extends BaseSchema {
       table.string('i_code')
       table.string('description')
       table.boolean('is_active').defaultTo(true)
-      table.integer('company_id').unsigned().references('id').inTable('company')
+      table.integer('company_id').unsigned().references('id').inTable('companies')
 
-      table.timestamp('created_at', { useTz: true })
-      table.timestamp('updated_at', { useTz: true })
+      table.timestamp('created_at', { useTz: true }).defaultTo(this.now())
+      table.timestamp('updated_at', { useTz: true }).defaultTo(this.now())
     })
   }
 

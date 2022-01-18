@@ -11,15 +11,15 @@ export default class HospitalBeds extends BaseSchema {
       table.string('description')
       table.boolean('is_active')
       table.string('cd_type_accomodation')
-      table.string('ds_type_accomodation')  
+      table.string('ds_type_accomodation')
       table.string('abstract_description')
       table.string('type_ocuppation')
-      
+
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL
        */
-      table.timestamp('created_at', { useTz: true })
-      table.timestamp('updated_at', { useTz: true })
+      table.timestamp('created_at', { useTz: true }).defaultTo(this.now())
+      table.timestamp('updated_at', { useTz: true }).defaultTo(this.now())
     })
   }
 

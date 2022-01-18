@@ -1,7 +1,7 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 //Interfaces
-import { IClientStore } from 'App/Interfaces/IClients'
+import { IClientStore, IClientShow } from 'App/Interfaces/IClients'
 
 // Models
 import ClientsModel from 'App/Models/Client'
@@ -25,7 +25,16 @@ export default class ClientsController {
     return iData.$isPersisted ? iData : false;
   }
 
-  public async show({}: HttpContextContract) {}
+  public async show(data: IClientShow) {
+    const sData =
+      await ClientsModel
+        .query()
+        .where('i_code', data.i_code)
+        .where('company_id', data.company_id)
+        .first()
+
+    return sData ? sData : false
+  }
 
   public async edit({}: HttpContextContract) {}
 

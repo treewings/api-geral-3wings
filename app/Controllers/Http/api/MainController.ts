@@ -14,6 +14,9 @@ import HealthInsurancesController from 'App/Controllers/Http/HealthInsurancesCon
 export default class MainController {
   public async index({ request, response } :HttpContextContract) {
 
+    // try {
+
+
     const { company, access_key } = request.headers()
 
     //#region validation headers
@@ -54,12 +57,22 @@ export default class MainController {
         sector_id: 0,
         inpatientUnit_id: 0,
         heathInsurance_id: 0,
-        hospitalBed_id: 0
+        hospitalBed_id: 0,
+        operations: {
+          attendance: 'create',
+          origin: 'nothing, already exists',
+          healthInsurance: 'nothing, already exists',
+          sector: 'nothing, already exists',
+          inpatientUnit: 'nothing, already exists',
+          hospitalBed: 'nothing, already exists',
+        }
       }
+
+      let returnClient;
 
       const {
         paciente: {
-          cd_paciente: i_code,
+          cd_paciente: i_code_client,
           nm_paciente: name,
           dt_nascimento: birth_date,
           sn_vip: is_vip,
@@ -68,7 +81,7 @@ export default class MainController {
         atendimento: {
           tp_atendimento: type_attendance,
           dt_atendimento: start_date,
-          hr_atendimento: start_hour,
+          //hr_atendimento: start_hour,
           nr_attendance: i_code_attendance,
           dt_alta: end_date,
           origem: {
@@ -85,11 +98,12 @@ export default class MainController {
             nm_setor: ds_sector,
           },
           unidade_internacao: {
-            cd_unid_int: i_code_impatient_unit,
-            ds_unid_int: ds_inpatient_units
+            cd_unid_int: i_code_inpatient_unit,
+            ds_unid_int: ds_inpatient_unit
           },
           leito:{
             cd_leito: i_code_hospital_bed,
+            ds_leito: ds_hospital_bed,
             cd_tip_acomodacao: cd_type_accomodation,
             ds_tip_acomodacao: ds_type_accomodation,
             ds_resumo_leito: abstract_description,
@@ -98,21 +112,28 @@ export default class MainController {
         }
       } = request.body()
 
-      //#region store client
-      const returnClientStore =
+      //#region client
+      const dataClient = await new ClientsController().show({ i_code: i_code_client, company_id: dataCompany.id})
+
+      if (!dataClient){
+        returnClient =
         await new ClientsController().store({
           birth_date,
-          i_code,
+          i_code: i_code_client,
           is_vip,
           name,
           phone_number,
           company_id: dataCompany.id
         })
-      //#endregion store client
+      }else{
+        returnClient = dataClient;
+      }
+
+      //#endregion client
 
       //#region store attendance
-      if(returnClientStore){
-        objAttendance.client_id = returnClientStore.id
+      if(returnClient){
+        objAttendance.client_id = returnClient.id
 
         // #region origin
         const dataOrigin =
@@ -137,6 +158,7 @@ export default class MainController {
           }
 
           objAttendance.origin_id = createDataOrigin.id
+          objAttendance.operations.origin = 'create'
 
         }else{
           objAttendance.origin_id = dataOrigin.id
@@ -165,6 +187,7 @@ export default class MainController {
           }
 
           objAttendance.heathInsurance_id = createDataHealthInsurance.id
+          objAttendance.operations.healthInsurance = 'create'
 
         }else{
           objAttendance.heathInsurance_id = dataHealthInsurance.id
@@ -172,44 +195,159 @@ export default class MainController {
 
         // #endregion health insurance
 
-        // sector
+        // #region sector
         const dataSector =
-          await new SectorsController().show({ i_code_sector, dataCompany.id })
-        if (dataSector){
-          // update
-        }else{
-          // create
-        }
+          await new SectorsController().show({ i_code:i_code_sector, company_id: dataCompany.id })
 
-        // unid_int
-        const dataImpatientUnit =
-          await new InpatientUnitsController().show({ i_code_impatient_unit, dataCompany.id })
-        if (dataImpatientUnit){
-          // update
-        }else{
-          // create
-        }
+        if (!dataSector){
+          const createDataSector =
+          await new SectorsController().store({
+            i_code: i_code_sector,
+            company_id: dataCompany.id,
+            description: ds_sector,
+          })
 
-        // hospital bed
-        const dataHospitalBed =
-          await new HospitalBedsController().show({ i_code_hospital_bed, dataCompany.id })
-        if (dataHospitalBed){
-          // update
-        }else{
-          // create
-        }
-
-
-        // attendance
-        const dataAttendance =
-          await new AttendancesController().show(i_code_attendance, dataCompany.id)
-
-          if (dataAttendance){
-            // update
-          }else{
-            // create
+          if (!createDataSector){
+            return response.status(500).json({
+              message: 'Error in creating Sector'
+            })
           }
+
+          objAttendance.sector_id = createDataSector.id
+          objAttendance.operations.sector = 'create'
+        }else{
+          objAttendance.sector_id = dataSector.id
+        }
+
+        // #endregion sector
+
+        // #region inpatientUnit
+        const dataImpatientUnit =
+          await new InpatientUnitsController().show({ i_code:i_code_inpatient_unit, sector_id: objAttendance.sector_id })
+
+        if (!dataImpatientUnit){
+          const createDataImpatientUnit =
+          await new InpatientUnitsController().store({
+            i_code: i_code_inpatient_unit,
+            sector_id: objAttendance.sector_id,
+            description: ds_inpatient_unit,
+          })
+
+          if (!createDataImpatientUnit){
+            return response.status(500).json({
+              message: 'Error in creating Inpatient Unit'
+            })
+          }
+
+          objAttendance.inpatientUnit_id = createDataImpatientUnit.id
+          objAttendance.operations.inpatientUnit = 'create'
+
+        }else{
+          objAttendance.inpatientUnit_id = dataImpatientUnit.id
+        }
+        // #endregion inpatientUnit
+
+        // #region hospital bed
+        const dataHospitalBed =
+          await new HospitalBedsController().show({ i_code: i_code_hospital_bed, inpatient_unit_id: objAttendance.inpatientUnit_id })
+
+        if (!dataHospitalBed){
+          const createDataHospitalBed =
+          await new HospitalBedsController().store({
+            i_code: i_code_hospital_bed,
+            description: ds_hospital_bed,
+            inpatient_unit_id: objAttendance.inpatientUnit_id,
+            cd_type_accomodation,
+            ds_type_accomodation,
+            type_ocuppation,
+            abstract_description
+          })
+
+          if (!createDataHospitalBed){
+            return response.status(500).json({
+              message: 'Error in creating Hospital Bed'
+            })
+          }
+
+          objAttendance.hospitalBed_id = createDataHospitalBed.id
+          objAttendance.operations.hospitalBed = 'create'
+
+        }else{
+          objAttendance.hospitalBed_id = dataHospitalBed.id
+        }
+
+        // #endregion hospital bed
+
+        // #region attendance
+        const dataAttendance =
+          await new AttendancesController().show({ i_code: i_code_attendance, client_id: objAttendance.client_id })
+
+          if (!dataAttendance){
+            const createDataAttendance =
+            await new AttendancesController().store({
+              i_code: i_code_attendance,
+              client_id: objAttendance.client_id,
+              end_date,
+              start_date,
+              sector_id: objAttendance.sector_id,
+              origin_id: objAttendance.origin_id,
+              type: type_attendance
+            })
+
+            if (!createDataAttendance){
+              return response.status(500).json({
+                message: 'Error in creating attendance'
+              })
+            }
+
+          }else{
+
+            const updateDataAttendance =
+            await new AttendancesController().update({
+              i_code: i_code_attendance,
+              client_id: objAttendance.client_id,
+              end_date,
+              start_date,
+              sector_id: objAttendance.sector_id,
+              origin_id: objAttendance.origin_id,
+              type: type_attendance
+            })
+
+            if (!updateDataAttendance){
+              return response.status(500).json({
+                message: 'Error in updating attendance'
+              })
+            }
+
+            objAttendance.operations.attendance = 'update'
+
+          }
+
+          // #endregion attendance
+
+        // #region return
+        return response.status(200).json({
+          status: 'success',
+          attendance: {
+            received_code: i_code_attendance,
+            operation: objAttendance.operations.attendance,
+            operation_tables: {
+              origin: objAttendance.operations.origin,
+              healthInsurance: objAttendance.operations.healthInsurance,
+              sector: objAttendance.operations.sector,
+              inpatientUnit:objAttendance.operations.inpatientUnit,
+              hospitalBed: objAttendance.operations.hospitalBed,
+            }
+
+          },
+        });
+        // #endregion return
+
       }
+
+    // } catch (error) {
+    //   return false;
+    // }
       //#endregion store attendance
 
       //#endregion body

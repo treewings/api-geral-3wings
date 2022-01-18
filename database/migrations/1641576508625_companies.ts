@@ -8,13 +8,14 @@ export default class Companies extends BaseSchema {
       table.increments('id')
       table.string('i_code')
       table.string('description')
+      table.string('access_key')
       table.boolean('is_active').defaultTo(true)
 
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL
        */
-      table.timestamp('created_at', { useTz: true })
-      table.timestamp('updated_at', { useTz: true })
+      table.timestamp('created_at', { useTz: true }).defaultTo(this.now())
+      table.timestamp('updated_at', { useTz: true }).defaultTo(this.now())
     })
   }
 

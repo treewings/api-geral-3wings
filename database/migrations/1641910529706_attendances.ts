@@ -9,15 +9,15 @@ export default class Attendances extends BaseSchema {
       table.integer('client_id').unsigned().references('id').inTable('clients')
       table.string('i_code')
       table.string('type')
-      table.timestamp('start_date')
-      table.timestamp('end_date')
+      table.string('start_date')
+      table.string('end_date')
       table.integer('origin_id').unsigned().references('id').inTable('origins')
       table.integer('sector_id').unsigned().references('id').inTable('sectors')
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL
        */
-      table.timestamp('created_at', { useTz: true })
-      table.timestamp('updated_at', { useTz: true })
+      table.timestamp('created_at', { useTz: true }).defaultTo(this.now())
+      table.timestamp('updated_at', { useTz: true }).defaultTo(this.now())
     })
   }
 
