@@ -9,7 +9,6 @@ export default class Clients extends BaseSchema {
       table.string('i_code')
       table.integer('company_id').unsigned().references('id').inTable('companies')
       table.string('name')
-      table.string('access_key')
       table.timestamp('birth_date')
       table.boolean('is_vip').nullable()
       table.string('phone_number')

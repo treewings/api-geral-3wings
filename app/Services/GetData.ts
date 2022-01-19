@@ -3,12 +3,33 @@ import builder from 'xmlbuilder'
 import xmlParser from 'xml2js'
 
 // Interfaces
-import { IGetData } from 'App/Interfaces/IServices'
+import { IGetData, IDataGetAttendance } from 'App/Interfaces/IServices'
+
+
+// Controlllers
+import ProcessDataController from 'App/Controllers/Http/api/ProcessDataController'
+import CompaniesController from 'App/Controllers/Http/CompaniesController'
 
 export default class GetData {
   public async xmlService(data: IGetData) {
 
-    //let obj;
+    console.log(data)
+
+    if (!data.company_id){
+      return {
+        message: 'Company not found'
+      }
+    }
+
+    const dataCompany = await new CompaniesController().show(data.company_id)
+
+    if (!dataCompany){
+      return {
+        message: 'Company not found in database'
+      }
+    }
+
+    let dataAttendance: IDataGetAttendance;
 
     let body = {
       "soapenv:Envelope": {
@@ -17,7 +38,7 @@ export default class GetData {
       "soapenv:Body": {
         "Atendimento": {
           "Atendimento": {
-            "CdAtendimento": 3060323
+            "CdAtendimento": data.nr_attendance
           }
         }
       }
@@ -41,14 +62,22 @@ export default class GetData {
         tagNameProcessors: [xmlParser.processors.stripPrefix],
         explicitArray: false
     };
-      xmlParser.parseString(res.data,options,(err, result) => {
+      xmlParser.parseString(res.data,options, async (err, result) => {
         if(err) {
-            throw err;
+          throw err;
         }
 
-        console.log(`Paciente: ${result.Envelope.Body.AtendimentoResponse.AtendimentoResult.paciente.nm_paciente}`)
+        dataAttendance = result.Envelope.Body.AtendimentoResponse.AtendimentoResult
+
+        const retProcessAttendance =
+          await new ProcessDataController().attendance(dataAttendance, dataCompany, data.nr_attendance)
+
+          console.log(retProcessAttendance)
+
       });
       // end read data xml
+
+
 
     }
 

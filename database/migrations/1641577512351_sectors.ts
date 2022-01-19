@@ -8,7 +8,7 @@ export default class Sectors extends BaseSchema {
       table.increments('id')
       table.string('i_code')
       table.string('description')
-      table.string('is_active').defaultTo(true)
+      table.boolean('is_active').defaultTo(true)
       table.integer('company_id').unsigned().references('id').inTable('companies')
 
       /**

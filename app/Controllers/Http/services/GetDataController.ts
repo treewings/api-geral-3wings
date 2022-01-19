@@ -12,12 +12,18 @@ export default class GetDataController {
     // reading active companies
     const dataCompanies = await new Companies().list()
 
-    let endpoints: string[] = [];
+    let companies: any = [];
 
     dataCompanies.forEach(e => {
-      endpoints.push(e.endpoint_attendance)
+      companies.push({
+        endpoint: e.endpoint_attendance, company_id: e.id, nr_attendance: 3060323
+      })
     });
 
-    await new GetData().xmlService({endpoint: endpoints[0]})
+    await new GetData().xmlService({
+      endpoint: companies[0].endpoint,
+      company_id:companies[0].company_id,
+      nr_attendance:companies[0].nr_attendance
+    })
   }
 }
