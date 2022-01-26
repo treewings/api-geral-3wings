@@ -12,6 +12,12 @@ export default class Company extends BaseModel {
   public description: string
 
   @column()
+  public invoked_api: boolean
+
+  @column()
+  public content_type: string
+
+  @column()
   public access_key: string
 
   @column()

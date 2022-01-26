@@ -1,5 +1,5 @@
 import { ApplicationContract } from '@ioc:Adonis/Core/Application'
-import cron from 'node-cron'
+//import cron from 'node-cron'
 import moment from 'moment'
 
 export default class AppProvider {
@@ -16,18 +16,18 @@ export default class AppProvider {
 
   public async ready () {
     // App is ready
-
+    console.log(`[${moment().format('MM-DD-YYYY H:mm:ss')}]: App is ready!`)
     // invoke controller for consume api
 
-    cron.schedule('* * * * *', async () => {
+    // cron.schedule('* * * * *', async () => {
 
-      console.log(`[${moment().format('MM-DD-YYYY H:mm:ss')}]: Consumindo API externa`)
+    //   console.log(`[${moment().format('MM-DD-YYYY H:mm:ss')}]: Consumindo API externa`)
 
-      const { default: GetDataController } = await import(
-        'App/Controllers/Http/services/GetDataController'
-      )
-      await new GetDataController().index()
-    });
+    //   const { default: GetDataController } = await import(
+    //     'App/Controllers/Http/services/GetDataController'
+    //   )
+    //   await new GetDataController().index()
+    // });
   }
 
   public async shutdown () {

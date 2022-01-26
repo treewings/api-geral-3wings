@@ -72,7 +72,9 @@ export default class ProcessDataController {
     let returnClient;
 
 
-    const dataClient = await new ClientsController().show({ i_code: i_code_client, company_id: dataCompany.id})
+    const dataClient = await new ClientsController().show({
+      i_code: i_code_client, company_id: dataCompany.id
+    })
 
     if (!dataClient){
       returnClient =
@@ -158,7 +160,10 @@ export default class ProcessDataController {
 
       // #region sector
       const dataSector =
-        await new SectorsController().show({ i_code:i_code_sector, company_id: dataCompany.id })
+        await new SectorsController().show({
+           i_code:i_code_sector,
+           company_id: dataCompany.id
+        })
 
       if (!dataSector){
         const createDataSector =
@@ -185,7 +190,9 @@ export default class ProcessDataController {
 
       // #region inpatientUnit
       const dataImpatientUnit =
-        await new InpatientUnitsController().show({ i_code:i_code_inpatient_unit, sector_id: objAttendance.sector_id })
+        await new InpatientUnitsController().show({
+          i_code:i_code_inpatient_unit, sector_id: objAttendance.sector_id
+        })
 
       if (!dataImpatientUnit){
         const createDataImpatientUnit =
@@ -212,7 +219,10 @@ export default class ProcessDataController {
 
       // #region hospital bed
       const dataHospitalBed =
-        await new HospitalBedsController().show({ i_code: i_code_hospital_bed, inpatient_unit_id: objAttendance.inpatientUnit_id })
+        await new HospitalBedsController().show({
+          i_code: i_code_hospital_bed,
+          inpatient_unit_id: objAttendance.inpatientUnit_id
+        })
 
       if (!dataHospitalBed){
         const createDataHospitalBed =
@@ -244,7 +254,10 @@ export default class ProcessDataController {
 
       // #region attendance
       const dataAttendance =
-        await new AttendancesController().show({ i_code: i_code_attendance, client_id: objAttendance.client_id })
+        await new AttendancesController().show({
+          i_code: i_code_attendance,
+          client_id: objAttendance.client_id
+        })
 
         if (!dataAttendance){
           const createDataAttendance =
@@ -292,23 +305,26 @@ export default class ProcessDataController {
         // #endregion attendance
 
       // #region return
+
       return {
         status: 'success',
-        message: {
-          attendance: {
-          received_code: i_code_attendance,
-          operation: objAttendance.operations.attendance,
-          operation_tables: {
-            origin: objAttendance.operations.origin,
-            healthInsurance: objAttendance.operations.healthInsurance,
-            sector: objAttendance.operations.sector,
-            inpatientUnit:objAttendance.operations.inpatientUnit,
-            hospitalBed: objAttendance.operations.hospitalBed,
-            }
-          },
-        }
+        // message: {
+        //   attendance: {
+        //   received_code: i_code_attendance,
+        //   operation: objAttendance.operations.attendance,
+        //   operation_tables: {
+        //     origin: objAttendance.operations.origin,
+        //     healthInsurance: objAttendance.operations.healthInsurance,
+        //     sector: objAttendance.operations.sector,
+        //     inpatientUnit:objAttendance.operations.inpatientUnit,
+        //     hospitalBed: objAttendance.operations.hospitalBed,
+        //     }
+        //   },
+        // }
+        message: data
 
       };
+
       // #endregion return
       //#endregion store attendance
     }

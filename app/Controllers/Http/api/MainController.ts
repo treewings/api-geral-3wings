@@ -10,8 +10,10 @@ export default class MainController {
 
   try {
 
-
-    const { company, access_key } = request.headers()
+    const {
+      company,
+      access_key
+    } = request.headers()
 
     //#region validation headers
     if (!company || !access_key){

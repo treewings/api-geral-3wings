@@ -33,7 +33,21 @@ export default class AttendancesController {
     await AttendanceModel
       .query()
       .where('i_code', data.i_code)
-      .where('client_id', data.client_id)
+      .where('client_id', data.client_id || 0)
+      .first()
+
+    return sData ? sData : false
+  }
+
+  public async showFromCompany(data: IAttendanceShow) {
+
+    const sData = await AttendanceModel
+      .query()
+      .where('i_code', data.i_code)
+      .where('company_id', data.company_id || 0)
+      .preload('origin')
+      .preload('sector')
+      .preload('client')
       .first()
 
     return sData ? sData : false

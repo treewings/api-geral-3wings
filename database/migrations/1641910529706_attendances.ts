@@ -7,6 +7,7 @@ export default class Attendances extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
       table.integer('client_id').unsigned().references('id').inTable('clients')
+      table.integer('company_id').unsigned().references('id').inTable('companies')
       table.string('i_code')
       table.string('type')
       table.string('start_date')

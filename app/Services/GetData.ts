@@ -5,15 +5,14 @@ import xmlParser from 'xml2js'
 // Interfaces
 import { IGetData, IDataGetAttendance } from 'App/Interfaces/IServices'
 
-
 // Controlllers
 import ProcessDataController from 'App/Controllers/Http/api/ProcessDataController'
 import CompaniesController from 'App/Controllers/Http/CompaniesController'
+import AttendancesController from 'App/Controllers/Http/AttendancesController'
 
 export default class GetData {
-  public async xmlService(data: IGetData) {
 
-    console.log(data)
+  public async xmlService(data: IGetData) {
 
     if (!data.company_id){
       return {
@@ -45,49 +44,80 @@ export default class GetData {
      }
     }
 
-  const xml = builder.create(body).end({ pretty: true })
+    const xml = builder.create(body).end({ pretty: true })
 
-  axios.post(data.endpoint, xml, {
-    headers: {
-      'Content-Type': 'text/xml',
-      'SOAPAction': "/ACSC.Negocios.Atendimento.Wings.WS.Service.Atendimento"
-    }
-  })
-  .then( (res) => {
-    if (res.status === 200) {
-      console.info(1)
+    const retAxios = await axios.post(data.endpoint, xml, {
+      headers: {
+        'Content-Type': 'text/xml',
+        'SOAPAction': "/ACSC.Negocios.Atendimento.Wings.WS.Service.Atendimento"
+      }
+    })
+    .then( async (res) => {
+      if (res.status === 200) {
 
-      // read data xml
-      const options = {
-        tagNameProcessors: [xmlParser.processors.stripPrefix],
-        explicitArray: false
-    };
-      xmlParser.parseString(res.data,options, async (err, result) => {
-        if(err) {
-          throw err;
+        const options = {
+          tagNameProcessors: [xmlParser.processors.stripPrefix],
+          explicitArray: false,
+        };
+
+
+        async function parse(res) {
+          const promise = await new Promise((resolve, reject) => {
+            const parser = new xmlParser.Parser(options);
+
+            parser.parseString(res.data, async (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+
+              dataAttendance =
+                result.Envelope.Body.AtendimentoResponse.AtendimentoResult;
+
+                await new ProcessDataController().attendance(
+                  dataAttendance,
+                  dataCompany,
+                  data.nr_attendance
+                );
+
+            });
+
+          });
+          return promise;
         }
 
-        dataAttendance = result.Envelope.Body.AtendimentoResponse.AtendimentoResult
-
-        const retProcessAttendance =
-          await new ProcessDataController().attendance(dataAttendance, dataCompany, data.nr_attendance)
-
-          console.log(retProcessAttendance)
-
-      });
-      // end read data xml
-
-
+        return parse(res);
 
     }
 
-  }).catch(err=>{
-    console.error(`error: ${err}`)
+
+
+  }).catch(async (err)=>{
+    console.error(`error: ${err}, retornando dados da ultima atualizacao`)
+
+    // procurando dados na base local
+
+    const attendanceLocal = await new AttendancesController().showFromCompany({
+      company_id: data.company_id,
+      i_code: data.nr_attendance.toString(),
+    });
+
+    if (!attendanceLocal){
+      return false;
+    }
+
+    let objAttendance = {
+      paciente: attendanceLocal.client,
+      atendimento: attendanceLocal,
+    }
+
+    return objAttendance;
+
   });
+
+  return retAxios;
 
   }
 
-  public async jsonService() {
+  public async jsonService(data: IGetData) {
     return true;
   }
 }

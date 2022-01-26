@@ -2,6 +2,7 @@ export interface IGetData{
   endpoint: string;
   company_id: number;
   nr_attendance: number;
+  type: string;
 }
 
 export interface IDataGetAttendance{

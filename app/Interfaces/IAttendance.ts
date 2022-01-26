@@ -20,7 +20,8 @@ export interface IAttendanceUpdate{
 
 export interface IAttendanceShow{
   i_code: string;
-  client_id: number;
+  client_id?: number;
+  company_id?: number;
 }
 
 
