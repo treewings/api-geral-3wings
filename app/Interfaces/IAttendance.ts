@@ -6,6 +6,10 @@ export interface IAttendanceStore{
   end_date: string;
   origin_id: number;
   sector_id: number;
+  inpatient_unit_id: number;
+  health_insurance_id: number;
+  hospital_bed_id: number;
+  company_id: number;
 }
 
 export interface IAttendanceUpdate{
@@ -16,6 +20,10 @@ export interface IAttendanceUpdate{
   end_date: string;
   origin_id: number;
   sector_id: number;
+  inpatient_unit_id: number;
+  health_insurance_id: number;
+  hospital_bed_id: number;
+  company_id: number;
 }
 
 export interface IAttendanceShow{

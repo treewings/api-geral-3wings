@@ -15,7 +15,8 @@ export default class OriginsController {
     const iData = await OriginModel.create({
       i_code: data.i_code,
       description: data.description,
-      company_id: data.company_id
+      company_id: data.company_id,
+      type: data.type,
      });
 
      return iData.$isPersisted ? iData: false;

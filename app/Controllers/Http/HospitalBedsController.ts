@@ -15,7 +15,11 @@ export default class HospitalBedsController {
     const iData = await HospitalBedtModel.create({
       i_code: data.i_code,
       description: data.description,
-      inpatient_unit_id: data.inpatient_unit_id
+      inpatient_unit_id: data.inpatient_unit_id,
+      abstract_description: data.abstract_description,
+      type_ocuppation: data.type_ocuppation,
+      cd_type_accomodation: data.cd_type_accomodation,
+      ds_type_accomodation: data.ds_type_accomodation,
      });
 
      return iData.$isPersisted ? iData: false;

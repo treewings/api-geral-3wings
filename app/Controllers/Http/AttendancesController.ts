@@ -13,8 +13,6 @@ export default class AttendancesController {
 
   public async store(data: IAttendanceStore) {
 
-    console.log(data)
-
     const iData = await AttendanceModel.create({
      client_id: data.client_id,
      start_date: data.start_date,
@@ -23,6 +21,10 @@ export default class AttendancesController {
      origin_id: data.origin_id,
      sector_id: data.sector_id,
      type: data.type,
+     inpatient_unit_id: data.inpatient_unit_id,
+     health_insurance_id: data.health_insurance_id,
+     hospital_bed_id: data.hospital_bed_id,
+     company_id: data.company_id
     });
 
     return iData.$isPersisted ? iData : false;
@@ -46,15 +48,14 @@ export default class AttendancesController {
       .where('i_code', data.i_code)
       .where('company_id', data.company_id || 0)
       .preload('origin')
+      .preload('inpatient_unit')
+      .preload('health_insurance')
+      .preload('hospital_bed')
       .preload('sector')
       .preload('client')
       .first()
 
     return sData ? sData : false
-  }
-
-  public async edit() {
-
   }
 
   public async update(data: IAttendanceUpdate) {
@@ -66,11 +67,15 @@ export default class AttendancesController {
         .first();
 
     if (eData){
-      eData.type        = data.type
-      eData.start_date  = data.start_date
-      eData.end_date    = data.end_date
-      eData.origin_id   = data.origin_id
-      eData.sector_id   = data.sector_id
+      eData.type                = data.type
+      eData.start_date          = data.start_date
+      eData.end_date            = data.end_date
+      eData.origin_id           = data.origin_id
+      eData.sector_id           = data.sector_id
+      eData.health_insurance_id = data.health_insurance_id
+      eData.hospital_bed_id     = data.hospital_bed_id
+      eData.company_id          = data.company_id
+
       eData.save();
 
       return eData.$isPersisted ? true : false;

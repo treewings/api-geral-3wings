@@ -6,7 +6,9 @@ import ClientModel from 'App/Models/Client'
 import CompanyModel from 'App/Models/Company'
 import OriginModel from 'App/Models/Origin'
 import SectorModel from 'App/Models/Sector'
-
+import InpatientUnitModel from 'App/Models/InpatientUnit'
+import HealthInsuranceModel from 'App/Models/HealthInsurance'
+import HospitalBedModel from 'App/Models/HospitalBed'
 
 export default class Attendance extends BaseModel {
   @column({ isPrimary: true })
@@ -31,10 +33,19 @@ export default class Attendance extends BaseModel {
   public origin_id: number
 
   @column()
+  public health_insurance_id: number
+
+  @column()
+  public hospital_bed_id: number
+
+  @column()
   public company_id: number
 
   @column()
   public sector_id: number
+
+  @column()
+  public inpatient_unit_id: number
 
   @belongsTo(() => ClientModel, {
     foreignKey: 'client_id'
@@ -50,6 +61,21 @@ export default class Attendance extends BaseModel {
     foreignKey: 'sector_id'
   })
   public sector: BelongsTo<typeof SectorModel>
+
+  @belongsTo(() => InpatientUnitModel, {
+    foreignKey: 'inpatient_unit_id'
+  })
+  public inpatient_unit: BelongsTo<typeof InpatientUnitModel>
+
+  @belongsTo(() => HealthInsuranceModel, {
+    foreignKey: 'health_insurance_id'
+  })
+  public health_insurance: BelongsTo<typeof HealthInsuranceModel>
+
+  @belongsTo(() => HospitalBedModel, {
+    foreignKey: 'hospital_bed_id'
+  })
+  public hospital_bed: BelongsTo<typeof HospitalBedModel>
 
   @belongsTo(() => CompanyModel, {
     foreignKey: 'company_id'

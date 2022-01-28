@@ -6,7 +6,7 @@ import Company from 'App/Models/Company'
 export default class CompanySeeder extends BaseSeeder {
   public async run () {
 
-    await Company.truncate(true)
+    // await Company.truncate(true)
 
     await Company.createMany([
       {

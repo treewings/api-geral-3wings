@@ -1,6 +1,7 @@
 import axios from 'axios'
 import builder from 'xmlbuilder'
 import xmlParser from 'xml2js'
+import Moment from 'moment'
 
 // Interfaces
 import { IGetData, IDataGetAttendance } from 'App/Interfaces/IServices'
@@ -84,16 +85,116 @@ export default class GetData {
           return promise;
         }
 
-        return parse(res);
+        let ret: any = await parse(res)
 
+        const {
+          paciente: {
+            cd_paciente,
+            nm_paciente,
+            dt_nascimento,
+            sn_vip,
+            telefone
+          },
+          atendimento: {
+            tp_atendimento,
+            dt_atendimento,
+            hr_atendimento,
+            dt_alta,
+            hr_alta,
+            origem: {
+              cd_ori_ate,
+              ds_ori_ate,
+              tp_origem
+            },
+            setor: {
+              cd_setor,
+              ds_setor
+            },
+            unidade_internacao: {
+              cd_unid_int,
+              ds_unid_int
+            },
+            convenio: {
+              cd_convenio,
+              nm_convenio
+            },
+            leito: {
+              cd_leito,
+              ds_leito,
+              ds_resumo_leito,
+              tp_ocupacao
+            }
+          }
+        } = ret.Envelope.Body.AtendimentoResponse.AtendimentoResult
+
+        let startDateFormated: string =
+          Moment(dt_atendimento).format(`YYYY-MM-DD`);
+
+        let startHourFormated: string =
+          Moment(hr_atendimento).format(`HH:mm:ss`);
+
+        let endDateFormated: string =
+        Moment(dt_alta).format(`YYYY-MM-DD`);
+
+        let endHourFormated: string =
+          Moment(hr_alta).format(`HH:mm:ss`);
+
+        let birthDateFormated = Moment(dt_nascimento).format(`YYYY-MM-DD HH:mm:ss`);
+
+        let snVip = sn_vip == `S` ? true : false;
+
+        let formatedRet = {
+          dataOrigin: `External API`,
+          paciente: {
+            cd_paciente,
+            nm_paciente,
+            dt_nascimento: birthDateFormated,
+            sn_vip: snVip,
+            telefone
+          },
+          atendimento: {
+            tp_atendimento,
+            dt_atendimento: startDateFormated,
+            hr_atendimento: startHourFormated,
+            dt_alta: endDateFormated  == `Invalid date` ? null : endDateFormated,
+            hr_alta: endHourFormated  == `Invalid date` ? null : endHourFormated,
+            origem: {
+              cd_ori_ate,
+              ds_ori_ate,
+              tp_origem
+            },
+            setor: {
+              cd_setor,
+              ds_setor
+            },
+            unidade_internacao: {
+              cd_unid_int,
+              ds_unid_int
+            },
+            convenio: {
+              cd_convenio,
+              nm_convenio
+            },
+            leito: {
+              cd_leito,
+              ds_leito,
+              ds_resumo_leito,
+              tp_ocupacao
+            }
+          }
+        };
+
+        return formatedRet;
     }
 
 
 
   }).catch(async (err)=>{
-    console.error(`error: ${err}, retornando dados da ultima atualizacao`)
+    //console.error(`error: ${err}, retornando dados da ultima atualizacao`)
 
     // procurando dados na base local
+    try {
+
 
     const attendanceLocal = await new AttendancesController().showFromCompany({
       company_id: data.company_id,
@@ -101,16 +202,108 @@ export default class GetData {
     });
 
     if (!attendanceLocal){
-      return false;
+      return `External API not responding or record not found anywhere`;
     }
 
+    const {
+      client: {
+        i_code: cd_paciente,
+        name: nm_paciente,
+        birth_date: dt_nascimento,
+        is_vip: sn_vip,
+        phone_number: telefone
+      },
+
+        type: tp_atendimento,
+        start_date: dt_atendimento,
+        end_date: dt_alta,
+        origin: {
+          i_code: cd_ori_ate,
+          description: ds_ori_ate,
+          type: tp_origem
+        },
+        sector: {
+          i_code: cd_setor,
+          description: ds_setor
+        },
+        inpatient_unit: {
+          i_code: cd_unid_int,
+          description: ds_unid_int
+        },
+        health_insurance: {
+          i_code: cd_convenio,
+          description: nm_convenio
+        },
+        hospital_bed: {
+          i_code: cd_leito,
+          description: ds_leito,
+          abstract_description: ds_resumo_leito,
+          type_ocuppation: tp_ocupacao
+        }
+     } =
+    attendanceLocal
+
+    let startDateFormated: string =
+      Moment(dt_atendimento).format(`YYYY-MM-DD`);
+
+    let startHourFormated: string =
+      Moment(dt_atendimento).format(`HH:mm:ss`);
+
+    let endDateFormated: string =
+    Moment(dt_alta).format(`YYYY-MM-DD`);
+
+    let endHourFormated: string =
+      Moment(dt_alta).format(`HH:mm:ss`);
+
+    let birthDateFormated = Moment(dt_nascimento).format(`YYYY-MM-DD HH:mm:ss`);
+
+    let snVip = sn_vip == false ? false : true;
+
     let objAttendance = {
-      paciente: attendanceLocal.client,
-      atendimento: attendanceLocal,
+      dataOrigin: `Local database`,
+          paciente: {
+            cd_paciente,
+            nm_paciente,
+            dt_nascimento: birthDateFormated,
+            sn_vip: snVip,
+            telefone
+          },
+          atendimento: {
+            tp_atendimento,
+            dt_atendimento: startDateFormated,
+            hr_atendimento: startHourFormated,
+            dt_alta: endDateFormated == `Invalid date` ? null : endDateFormated,
+            hr_alta: endHourFormated == `Invalid date` ? null : endHourFormated,
+            origem: {
+              cd_ori_ate,
+              ds_ori_ate,
+              tp_origem
+            },
+            setor: {
+              cd_setor,
+              ds_setor
+            },
+            unidade_internacao: {
+              cd_unid_int,
+              ds_unid_int
+            },
+            convenio: {
+              cd_convenio,
+              nm_convenio
+            },
+            leito: {
+              cd_leito,
+              ds_leito,
+              ds_resumo_leito,
+              tp_ocupacao
+            }
+          }
     }
 
     return objAttendance;
-
+  } catch (error) {
+    console.error(error)
+  }
   });
 
   return retAxios;
