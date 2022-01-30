@@ -30,7 +30,7 @@ Route.post('api/in/attendance', async (ctx) => {
 })
 
 
-Route.post('api/out/attendance', async (ctx) => {
+Route.post('api/out', async (ctx) => {
 
   const { default: MainController } = await import(
     'App/Controllers/Http/Out/MainController'

@@ -1,7 +1,7 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import CompaniesController from 'App/Controllers/Http/CompaniesController'
 import GerDataService from 'App/Controllers/Http/services/GetDataController'
-
+import Log from 'debug'
 export default class MainController{
   public async index({
     request,
@@ -9,6 +9,8 @@ export default class MainController{
   }: HttpContextContract){
 
     try {
+
+      const log = Log('out:attendance')
 
       // #region ctx
       const {
@@ -75,7 +77,7 @@ export default class MainController{
         type
       })
       // #endregion GetData
-
+      log(retDataService)
       return response.status(200).json(
         {
           message: retDataService,

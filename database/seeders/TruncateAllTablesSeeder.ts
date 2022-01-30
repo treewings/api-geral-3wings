@@ -13,7 +13,6 @@ import AttendanceModel from 'App/Models/Attendance'
 export default class TruncateAllTablesSeeder extends BaseSeeder {
   public async run () {
 
-    console.log('Truncate all tables')
     await AttendanceModel.truncate(true)
     await HealthInsuranceModel.truncate(true)
     await OriginModel.truncate(true)
