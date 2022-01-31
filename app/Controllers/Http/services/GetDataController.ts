@@ -1,7 +1,8 @@
 // import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 // Controllers
-import Companies from "App/Controllers/Http/CompaniesController";
+//import Companies from "App/Controllers/Http/Tables/CompaniesController";
+import ExternalApis from "App/Controllers/Http/Tables/ExternalApisController";
 
 // Services
 import GetData from "App/Services/GetData"
@@ -13,20 +14,19 @@ export default class GetDataController {
   public async index(data: IGetData) {
 
     const dataC = {
-      endpoint: data.endpoint,
       company_id: data.company_id,
       nr_attendance: data.nr_attendance,
-      type: data.type
+      consult: data.consult,
     }
 
-    const dataCompany = await new Companies().show(data.company_id);
+    const dataExternalApis = await new ExternalApis().show(data.company_id, data.consult);
 
-    if (dataCompany){
-      if (dataCompany.content_type == 'application/json') {
+    if (dataExternalApis){
+      if (dataExternalApis.content_type == 'application/json') {
         let retJson = await new GetData().jsonService(dataC);
         return retJson;
 
-      }else if (dataCompany.content_type == 'text/xml'){
+      }else if (dataExternalApis.content_type == 'text/xml'){
         let retXML = await new GetData().xmlService(dataC);
         return retXML;
       }

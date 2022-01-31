@@ -1,22 +1,25 @@
-import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import CompaniesController from 'App/Controllers/Http/CompaniesController'
-import GerDataService from 'App/Controllers/Http/services/GetDataController'
 import Log from 'debug'
+
+import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import CompaniesController from 'App/Controllers/Http/Tables/CompaniesController'
+import GetDataService from 'App/Controllers/Http/services/GetDataController'
+
 export default class MainController{
   public async index({
     request,
     response
   }: HttpContextContract){
 
+    const log = Log('out:main')
     try {
 
-      const log = Log('out:attendance')
+
 
       // #region ctx
       const {
         nr_attendance,
         company_id,
-        type
+        consult
       } = request.body()
 
       const {
@@ -59,10 +62,10 @@ export default class MainController{
         )
       }
 
-      if (!type){
+      if (!consult){
         return response.status(500).json(
           {
-            message: `type is required`,
+            message: `table is required`,
           }
         )
       }
@@ -70,21 +73,30 @@ export default class MainController{
       //#endregion validations
 
       // #region GetData
-      const retDataService = await new GerDataService().index({
-        endpoint: dataCompany.endpoint_attendance,
+      const retDataService = await new GetDataService().index({
         company_id,
         nr_attendance,
-        type
+        consult,
       })
       // #endregion GetData
-      log(retDataService)
-      return response.status(200).json(
-        {
-          message: retDataService,
-        }
-      )
+      if (retDataService){
+
+        return response.status(200).json(
+          {
+            message: retDataService,
+          }
+        )
+
+      }else{
+        return response.status(500).json(
+          {
+            message: 'Unknown error',
+          }
+        )
+      }
 
     } catch (error) {
+      log(error)
       return response.status(500).json(
         {
           message: error,

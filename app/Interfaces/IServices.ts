@@ -1,8 +1,12 @@
 export interface IGetData{
-  endpoint: string;
   company_id: number;
   nr_attendance: number;
-  type: string;
+  consult: string;
+}
+
+export interface IReturnGetData{
+  status: any;
+  message: any;
 }
 
 export interface IDataGetAttendance{

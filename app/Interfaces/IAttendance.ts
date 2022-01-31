@@ -3,7 +3,7 @@ export interface IAttendanceStore{
   i_code: string;
   type: string;
   start_date: string;
-  end_date: string;
+  end_date: string | null;
   origin_id: number;
   sector_id: number;
   inpatient_unit_id: number;
@@ -17,7 +17,7 @@ export interface IAttendanceUpdate{
   client_id: number;
   type: string;
   start_date: string;
-  end_date: string;
+  end_date: string | null;
   origin_id: number;
   sector_id: number;
   inpatient_unit_id: number;

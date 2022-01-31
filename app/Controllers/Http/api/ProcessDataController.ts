@@ -1,17 +1,20 @@
 import Moment from 'moment'
+import Log from 'debug'
 
-import ClientsController from 'App/Controllers/Http/ClientsController'
-import AttendancesController from 'App/Controllers/Http/AttendancesController'
-import OriginsController from 'App/Controllers/Http/OriginsController'
-import SectorsController from 'App/Controllers/Http/SectorsController'
-import InpatientUnitsController from 'App/Controllers/Http/InpatientUnitsController'
-import HospitalBedsController from 'App/Controllers/Http/HospitalBedsController'
-import HealthInsurancesController from 'App/Controllers/Http/HealthInsurancesController'
+import ClientsController from 'App/Controllers/Http/Tables/ClientsController'
+import AttendancesController from 'App/Controllers/Http/Tables/AttendancesController'
+import OriginsController from 'App/Controllers/Http/Tables/OriginsController'
+import SectorsController from 'App/Controllers/Http/Tables/SectorsController'
+import InpatientUnitsController from 'App/Controllers/Http/Tables/InpatientUnitsController'
+import HospitalBedsController from 'App/Controllers/Http/Tables/HospitalBedsController'
+import HealthInsurancesController from 'App/Controllers/Http/Tables/HealthInsurancesController'
 
 export default class ProcessDataController {
   public async attendance(data, dataCompany, nr_attendance){
 
     try {
+
+      const log = Log('processData:attendance')
 
       const {
         paciente: {
@@ -268,11 +271,12 @@ export default class ProcessDataController {
           })
 
           // format date attendance
+
           let startDateFormated: string =
             Moment(start_date).format(`YYYY-MM-DD`)+` `+Moment(start_hour).format(`HH:mm:ss`)
 
-          let endDateFormated: string =
-          Moment(end_date).format(`YYYY-MM-DD`)+` `+Moment(end_hour).format(`HH:mm:ss`)
+          let endDateFormated = end_date != '' ?
+            Moment(end_date).format(`YYYY-MM-DD`)+` `+Moment(end_hour).format(`HH:mm:ss`) : null
 
           if (!dataAttendance){
 
@@ -329,7 +333,7 @@ export default class ProcessDataController {
           // #endregion attendance
 
         // #region return
-
+        log(`Data return: ${JSON.stringify(data)}`)
         return {
           status: 'success',
           // message: {

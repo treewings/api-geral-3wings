@@ -16,7 +16,7 @@ export default class CompaniesController {
   }
 
   public async list() {
-    const data = 
+    const data =
       await CompanyModel
         .query()
         .where('is_active', true)

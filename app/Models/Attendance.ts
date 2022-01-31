@@ -27,7 +27,7 @@ export default class Attendance extends BaseModel {
   public start_date: string
 
   @column()
-  public end_date: string
+  public end_date: string | null
 
   @column()
   public origin_id: number

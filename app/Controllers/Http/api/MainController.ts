@@ -1,7 +1,7 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 // Controllers
-import CompaniesController from 'App/Controllers/Http/CompaniesController'
+import CompaniesController from 'App/Controllers/Http/Tables/CompaniesController'
 import ProcessDataController from 'App/Controllers/Http/api/ProcessDataController'
 
 
