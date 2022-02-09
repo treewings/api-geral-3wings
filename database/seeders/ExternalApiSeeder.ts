@@ -31,6 +31,20 @@ export default class ExternalApiSeederSeeder extends BaseSeeder {
         headers: headersTables,
         company_id: 1,
       },
+      {
+        description: 'attendance',
+        url: 'http://10.0.38.39/tascom/prd/tascomPanel/public/api/attendance',
+        content_type: 'application/json',
+        body: '{"atendimento": 0, "token": "ghjr4925ddrnnlpo56c6d5hj6d5b2e9aqz6494adadhjkghudsdf4d54mlo9kyrscnznx"}',
+        company_id: 2,
+      },
+      {
+        description: 'tables',
+        url: 'http://10.0.38.39/tascom/prd/tascomPanel/public/api/tables',
+        content_type: 'application/json',
+        body: '{"cd_multi_empresa": 0,"token": "ghjr4925ddrnnlpo56c6d5hj6d5b2e9aqz6494adadhjkghudsdf4d54mlo9kyrscnznx"}',
+        company_id: 2,
+      },
     ])
   }
 }

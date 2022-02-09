@@ -1,6 +1,6 @@
 export interface IGetData{
   company_id: number;
-  nr_attendance: number;
+  i_code: number;
   consult: string;
 }
 
@@ -47,6 +47,34 @@ export interface IDataGetAttendance{
       tp_acomodacao: string;
       ds_resumo_leito: string;
       tp_ocupacao: string;
+    }
+  }
+}
+
+export interface IDataGetTables{
+  setores: {
+    setor:{
+      cd_setor: string;
+      ds_setor: string;
+      sn_setor: string;
+      unidades_internacao:{
+        unidade_internacao: {
+          cd_unid_int: string;
+          ds_unid_int: string;
+          sn_ativo: string;
+          leitos:{
+            leito: {
+              cd_leito: string;
+              ds_leito: string;
+              cd_tip_acomodacao: string;
+              ds_tip_acomodacao: string;
+              ds_resumo_leito: string;
+              tp_ocupacao: string;
+              sn_ativo: string;
+            }
+          }
+        }
+      }
     }
   }
 }

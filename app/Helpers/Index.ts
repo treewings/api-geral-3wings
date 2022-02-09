@@ -1,18 +1,11 @@
+import xmlParser from 'xml2js'
+
 export default class Helpers{
 
   /**
-   *
-   * @param object Objeto com os dados necessários para a abertura do chamado
-   * @param keyString
-   * @returns
-   * >```json
-   * {
-   *   "resourceName": "schedule",
-   *   "resourceId": 102030,
-   *   "link": "/schedule/102030.xml",
-   * }
-   * ```
-   */
+   * @param object Objeto original
+   * @param keyString Strings separadas por ponto
+  **/
 
   public getObjectsValueByStringKey(object: object, keyString: string): any {
     return [object].concat(
@@ -22,4 +15,29 @@ export default class Helpers{
     )
 
   }
+
+  public async parseStringXml(stringValue: string){
+
+    const options = {
+      tagNameProcessors: [xmlParser.processors.stripPrefix],
+      explicitArray: false,
+    };
+
+    async function parse(res) {
+      const promise = await new Promise((resolve, reject) => {
+        const parser = new xmlParser.Parser(options);
+        parser.parseString(res, async (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        });
+
+      });
+      return promise;
+    }
+
+    return await parse(stringValue);
+  }
+
+
+
 }

@@ -10,52 +10,53 @@ import HospitalBedsController from 'App/Controllers/Http/Tables/HospitalBedsCont
 import HealthInsurancesController from 'App/Controllers/Http/Tables/HealthInsurancesController'
 
 export default class ProcessDataController {
-  public async attendance(data, dataCompany, nr_attendance){
-
+  public async attendance(data, dataCompany, nr_attendance) {
+    const log = Log('processData:attendance')
     try {
 
-      const log = Log('processData:attendance')
+
+      log(`Init`)
 
       const {
         paciente: {
-        cd_paciente: i_code_client,
-        nm_paciente: name,
-        dt_nascimento: birth_date,
-        sn_vip: is_vip,
-        telefone: phone_number,
-      },
-      atendimento: {
-        tp_atendimento: type_attendance,
-        dt_atendimento: start_date,
-        hr_atendimento: start_hour,
-        dt_alta: end_date,
-        hr_alta: end_hour,
-        origem: {
-          cd_ori_ate: i_code_origin,
-          ds_ori_ate: ds_origin,
-          tp_origem: type_origin,
+          cd_paciente: i_code_client,
+          nm_paciente: name,
+          dt_nascimento: birth_date,
+          sn_vip: is_vip,
+          telefone: phone_number,
         },
-        convenio: {
-          cd_convenio: i_code_health_insurance,
-          nm_convenio: ds_health_insurance
-        },
-        setor: {
-          cd_setor: i_code_sector,
-          ds_setor: ds_sector,
-        },
-        unidade_internacao: {
-          cd_unid_int: i_code_inpatient_unit,
-          ds_unid_int: ds_inpatient_unit
-        },
-        leito:{
-          cd_leito: i_code_hospital_bed,
-          ds_leito: ds_hospital_bed,
-          cd_tip_acomodacao: cd_type_accomodation,
-          ds_tip_acomodacao: ds_type_accomodation,
-          ds_resumo_leito: abstract_description,
-          tp_ocupacao: type_ocuppation,
-        }
-      } } = data
+        atendimento: {
+          tp_atendimento: type_attendance,
+          dt_atendimento: start_date,
+          hr_atendimento: start_hour,
+          dt_alta: end_date,
+          hr_alta: end_hour,
+          origem: {
+            cd_ori_ate: i_code_origin,
+            ds_ori_ate: ds_origin,
+            tp_origem: type_origin,
+          },
+          convenio: {
+            cd_convenio: i_code_health_insurance,
+            nm_convenio: ds_health_insurance
+          },
+          setor: {
+            cd_setor: i_code_sector,
+            ds_setor: ds_sector,
+          },
+          unidade_internacao: {
+            cd_unid_int: i_code_inpatient_unit,
+            ds_unid_int: ds_inpatient_unit
+          },
+          leito: {
+            cd_leito: i_code_hospital_bed,
+            ds_leito: ds_hospital_bed,
+            cd_tip_acomodacao: cd_type_accomodation,
+            ds_tip_acomodacao: ds_type_accomodation,
+            ds_resumo_leito: abstract_description,
+            tp_ocupacao: type_ocuppation,
+          }
+        } } = data
 
       let i_code_attendance = nr_attendance;
 
@@ -84,27 +85,28 @@ export default class ProcessDataController {
         i_code: i_code_client, company_id: dataCompany.id
       })
 
-      if (!dataClient){
+      if (!dataClient) {
 
         let snVip = is_vip == `S` ? true : false;
-
+        log(`client not exists, creating`)
         returnClient =
-        await new ClientsController().store({
-          birth_date,
-          i_code: i_code_client,
-          is_vip: snVip,
-          name,
-          phone_number,
-          company_id: dataCompany.id
-        })
-      }else{
+          await new ClientsController().store({
+            birth_date,
+            i_code: i_code_client,
+            is_vip: snVip,
+            name,
+            phone_number,
+            company_id: dataCompany.id
+          })
+      } else {
+        log(`client exist, continue`)
         returnClient = dataClient;
       }
 
       //#endregion client
 
       //#region store attendance
-      if(returnClient){
+      if (returnClient) {
         objAttendance.client_id = returnClient.id
 
         // #region origin
@@ -114,16 +116,16 @@ export default class ProcessDataController {
             company_id: dataCompany.id
           })
 
-        if (!dataOrigin){
+        if (!dataOrigin) {
           const createDataOrigin =
-          await new OriginsController().store({
-            i_code: i_code_origin,
-            company_id: dataCompany.id,
-            description: ds_origin,
-            type: type_origin
-          })
+            await new OriginsController().store({
+              i_code: i_code_origin,
+              company_id: dataCompany.id,
+              description: ds_origin,
+              type: type_origin
+            })
 
-          if (!createDataOrigin){
+          if (!createDataOrigin) {
             return {
               status: 500,
               message: 'Error in creating Origin'
@@ -133,27 +135,27 @@ export default class ProcessDataController {
           objAttendance.origin_id = createDataOrigin.id
           objAttendance.operations.origin = 'create'
 
-        }else{
+        } else {
           objAttendance.origin_id = dataOrigin.id
         }
         // #endregion origin
 
         // #region health insurance
         const dataHealthInsurance =
-        await new HealthInsurancesController().show({
-          i_code: i_code_health_insurance,
-          company_id: dataCompany.id
-        })
-
-        if (!dataHealthInsurance){
-          const createDataHealthInsurance =
-          await new HealthInsurancesController().store({
+          await new HealthInsurancesController().show({
             i_code: i_code_health_insurance,
-            company_id: dataCompany.id,
-            description: ds_health_insurance,
+            company_id: dataCompany.id
           })
 
-          if (!createDataHealthInsurance){
+        if (!dataHealthInsurance) {
+          const createDataHealthInsurance =
+            await new HealthInsurancesController().store({
+              i_code: i_code_health_insurance,
+              company_id: dataCompany.id,
+              description: ds_health_insurance,
+            })
+
+          if (!createDataHealthInsurance) {
             return {
               status: 500,
               message: 'Error in creating Health Insurance'
@@ -163,7 +165,7 @@ export default class ProcessDataController {
           objAttendance.heathInsurance_id = createDataHealthInsurance.id
           objAttendance.operations.healthInsurance = 'create'
 
-        }else{
+        } else {
           objAttendance.heathInsurance_id = dataHealthInsurance.id
         }
 
@@ -172,19 +174,19 @@ export default class ProcessDataController {
         // #region sector
         const dataSector =
           await new SectorsController().show({
-            i_code:i_code_sector,
+            i_code: i_code_sector,
             company_id: dataCompany.id
           })
 
-        if (!dataSector){
+        if (!dataSector) {
           const createDataSector =
-          await new SectorsController().store({
-            i_code: i_code_sector,
-            company_id: dataCompany.id,
-            description: ds_sector,
-          })
+            await new SectorsController().store({
+              i_code: i_code_sector,
+              company_id: dataCompany.id,
+              description: ds_sector,
+            })
 
-          if (!createDataSector){
+          if (!createDataSector) {
             return {
               status: 500,
               message: 'Error in creating Sector'
@@ -193,7 +195,7 @@ export default class ProcessDataController {
 
           objAttendance.sector_id = createDataSector.id
           objAttendance.operations.sector = 'create'
-        }else{
+        } else {
           objAttendance.sector_id = dataSector.id
         }
 
@@ -202,18 +204,18 @@ export default class ProcessDataController {
         // #region inpatientUnit
         const dataImpatientUnit =
           await new InpatientUnitsController().show({
-            i_code:i_code_inpatient_unit, sector_id: objAttendance.sector_id
+            i_code: i_code_inpatient_unit, sector_id: objAttendance.sector_id
           })
 
-        if (!dataImpatientUnit){
+        if (!dataImpatientUnit) {
           const createDataImpatientUnit =
-          await new InpatientUnitsController().store({
-            i_code: i_code_inpatient_unit,
-            sector_id: objAttendance.sector_id,
-            description: ds_inpatient_unit,
-          })
+            await new InpatientUnitsController().store({
+              i_code: i_code_inpatient_unit,
+              sector_id: objAttendance.sector_id,
+              description: ds_inpatient_unit,
+            })
 
-          if (!createDataImpatientUnit){
+          if (!createDataImpatientUnit) {
             return {
               status: 500,
               message: 'Error in creating Inpatient Unit'
@@ -223,7 +225,7 @@ export default class ProcessDataController {
           objAttendance.inpatientUnit_id = createDataImpatientUnit.id
           objAttendance.operations.inpatientUnit = 'create'
 
-        }else{
+        } else {
           objAttendance.inpatientUnit_id = dataImpatientUnit.id
         }
         // #endregion inpatientUnit
@@ -235,19 +237,19 @@ export default class ProcessDataController {
             inpatient_unit_id: objAttendance.inpatientUnit_id
           })
 
-        if (!dataHospitalBed){
+        if (!dataHospitalBed) {
           const createDataHospitalBed =
-          await new HospitalBedsController().store({
-            i_code: i_code_hospital_bed,
-            description: ds_hospital_bed,
-            inpatient_unit_id: objAttendance.inpatientUnit_id,
-            cd_type_accomodation,
-            ds_type_accomodation,
-            type_ocuppation,
-            abstract_description
-          })
+            await new HospitalBedsController().store({
+              i_code: i_code_hospital_bed,
+              description: ds_hospital_bed,
+              inpatient_unit_id: objAttendance.inpatientUnit_id,
+              cd_type_accomodation,
+              ds_type_accomodation,
+              type_ocuppation,
+              abstract_description
+            })
 
-          if (!createDataHospitalBed){
+          if (!createDataHospitalBed) {
             return {
               status: 500,
               message: 'Error in creating Hospital Bed'
@@ -257,7 +259,7 @@ export default class ProcessDataController {
           objAttendance.hospitalBed_id = createDataHospitalBed.id
           objAttendance.operations.hospitalBed = 'create'
 
-        }else{
+        } else {
           objAttendance.hospitalBed_id = dataHospitalBed.id
         }
 
@@ -270,17 +272,17 @@ export default class ProcessDataController {
             client_id: objAttendance.client_id
           })
 
-          // format date attendance
+        // format date attendance
 
-          let startDateFormated: string =
-            Moment(start_date).format(`YYYY-MM-DD`)+` `+Moment(start_hour).format(`HH:mm:ss`)
+        let startDateFormated: string =
+          Moment(start_date).format(`YYYY-MM-DD`) + ` ` + Moment(start_hour).format(`HH:mm:ss`)
 
-          let endDateFormated = end_date != '' ?
-            Moment(end_date).format(`YYYY-MM-DD`)+` `+Moment(end_hour).format(`HH:mm:ss`) : null
+        let endDateFormated = end_date != '' ?
+          Moment(end_date).format(`YYYY-MM-DD`) + ` ` + Moment(end_hour).format(`HH:mm:ss`) : null
 
-          if (!dataAttendance){
+        if (!dataAttendance) {
 
-            const createDataAttendance =
+          const createDataAttendance =
             await new AttendancesController().store({
               i_code: i_code_attendance,
               client_id: objAttendance.client_id,
@@ -295,16 +297,16 @@ export default class ProcessDataController {
               company_id: dataCompany.id
             })
 
-            if (!createDataAttendance){
-              return {
-                status: 500,
-                message: 'Error in creating attendance'
-              }
+          if (!createDataAttendance) {
+            return {
+              status: 500,
+              message: 'Error in creating attendance'
             }
+          }
 
-          }else{
+        } else {
 
-            const updateDataAttendance =
+          const updateDataAttendance =
             await new AttendancesController().update({
               i_code: i_code_attendance,
               client_id: objAttendance.client_id,
@@ -319,18 +321,18 @@ export default class ProcessDataController {
               company_id: dataCompany.id,
             })
 
-            if (!updateDataAttendance){
-              return {
-                status: 500,
-                message:  'Error in updating attendance'
-              }
+          if (!updateDataAttendance) {
+            return {
+              status: 500,
+              message: 'Error in updating attendance'
             }
-
-            objAttendance.operations.attendance = 'update'
-
           }
 
-          // #endregion attendance
+          objAttendance.operations.attendance = 'update'
+
+        }
+
+        // #endregion attendance
 
         // #region return
         log(`Data return: ${JSON.stringify(data)}`)
@@ -357,9 +359,241 @@ export default class ProcessDataController {
         //#endregion store attendance
       }
 
-  } catch (error) {
-    return 0
+    } catch (error) {
+      log(error)
+      return 0
 
+    }
   }
+
+  public async tables(data, dataCompany) {
+
+    const log = Log('processData:tables')
+
+    //log(`returning Data in processData:tables: ${JSON.stringify(data)}`)
+
+    const {
+      setores: {
+        setor: sectors
+      }
+    } = data;
+
+    let objData: any[] = [];
+
+    // #region sector
+    for await (let sector of sectors) {
+
+      try {
+
+        let sector_id: any;
+
+        const dataSector =
+          await new SectorsController().show({
+            i_code: sector.cd_setor,
+            company_id: dataCompany.id
+          })
+
+        if (!dataSector) {
+          const storeSector =
+            await new SectorsController().store({
+              i_code: sector.cd_setor,
+              company_id: dataCompany.id,
+              description: sector.ds_setor,
+            })
+
+            if (storeSector)
+            sector_id = storeSector.id
+
+        }else{
+            sector_id = dataSector.id
+        }
+
+        //log(`setor: ${sector_id}`)
+
+        if (sector.hasOwnProperty(`unidades_internacao`)){
+          sector.sector_id = sector_id
+          objData.push(sector)
+        }
+
+      } catch (error) {
+        log(`error_sector: ${error.message}`)
+      }
+
+
+    }
+    // #endregion sector
+
+    let objInpatient: any[] = [];
+
+    // function for execute the generation and map the inpatientUnit
+    async function* genInpatients(){
+      for (const sector of objData){
+
+
+
+        let arr: any [] = [];
+        let ret: any;
+
+        if (sector.unidades_internacao)
+          sector.unidades_internacao.sector_id = sector.sector_id
+          sector.unidades_internacao.cd_setor = sector.cd_setor
+
+          if (Array.isArray(sector.unidades_internacao.unidade_internacao)){
+
+            sector.unidades_internacao.unidade_internacao.forEach(element => {
+                arr.push({
+                  unidade_internacao: element,
+                  sector_id: sector.sector_id,
+                  cd_setor: sector.cd_setor
+                })
+            });
+
+            ret = arr
+            //log(`genInpatients: ${JSON.stringify(arr)}`)
+
+          }else{
+            ret = sector.unidades_internacao;
+          }
+
+        yield ret;
+
+      }
+    }
+
+    async function fncBeds(dataInpatients){
+
+     //og(`datain: ${JSON.stringify(dataInpatients)}`)
+      let arrBed: any[] = [];
+      for (const inpatientsFor of dataInpatients){
+
+
+        //let retBed: any;
+
+        //log(`inpatients: ${JSON.stringify(inpatients)}`)
+
+        if (inpatientsFor.leito){
+          inpatientsFor.leito.inpatientUnit_id = inpatientsFor.inpatientUnit_id
+
+          if (Array.isArray(inpatientsFor.leito)){
+
+            // inpatients.leito.forEach(element => {
+            //   arrBed.push(element)
+            // });
+
+            for (let index = 0; index < inpatientsFor.leito.length; index++) {
+              const element = inpatientsFor.leito[index];
+              //log(`chegou aqui: ${element.cd_leito}`)
+              arrBed.push({
+                inpatientUnit_id: inpatientsFor.inpatientUnit_id,
+                cd_leito: element.cd_leito,
+                description: element.ds_leito,
+                inpatient_unit_id: element.inpatientUnit_id,
+                cd_type_accomodation: element.cd_tip_acomodacao,
+                ds_type_accomodation: element.ds_tip_acomodacao,
+                type_ocuppation: element.tp_ocupacao,
+                abstract_description: element.ds_resumo_leito,
+                is_active: element.sn_ativo
+              })
+            }
+
+          }
+          // }else{
+          //   return inpatientsFor.leito;
+          // }
+
+
+        }
+
+
+      }
+
+      return arrBed;
+    }
+
+    for await (let dataInpatientsFor of genInpatients()){
+
+      try {
+
+        if (Array.isArray(dataInpatientsFor)){
+          dataInpatientsFor = dataInpatientsFor[0]
+        }
+
+
+          //log(`chegou no for das unidade_internacao: ${JSON.stringify(dataInpatientsFor[0])}`)
+          let inpatientUnit_id;
+          log(`data unid int: ${dataInpatientsFor.unidade_internacao.cd_unid_int}, sector_id: ${dataInpatientsFor.sector_id} cd_setor: ${dataInpatientsFor.cd_setor}`)
+
+          const dataInpatientUnit =
+          await new InpatientUnitsController().show({
+            i_code: dataInpatientsFor.unidade_internacao.cd_unid_int,
+            sector_id: dataInpatientsFor.sector_id,
+          })
+
+          if (!dataInpatientUnit) {
+          const storeInpatientUnit =
+            await new InpatientUnitsController().store({
+              i_code: dataInpatientsFor.unidade_internacao.cd_unid_int,
+              sector_id: dataInpatientsFor.sector_id,
+              description: dataInpatientsFor.unidade_internacao.ds_unid_int,
+            })
+
+            if (storeInpatientUnit)
+              inpatientUnit_id = storeInpatientUnit.id
+
+          }else{
+            inpatientUnit_id = dataInpatientUnit.id
+          }
+
+          if (dataInpatientsFor.unidade_internacao.hasOwnProperty(`leitos`)){
+            dataInpatientsFor.unidade_internacao.leitos.inpatientUnit_id = inpatientUnit_id
+            objInpatient.push(dataInpatientsFor.unidade_internacao.leitos)
+          }
+
+      } catch (error) {
+        log(`error unid_int: ${error.message}`)
+      }
+
+    }
+
+    //log(`objInpatient: ${JSON.stringify(objInpatient)}`)
+
+    const retFncBeds = await fncBeds(objInpatient);
+
+    //log(`retFncBeds: ${JSON.stringify(retFncBeds)}`)
+
+    for await (const dataBeds of retFncBeds){
+      try {
+
+       // log(`data leitos: ${JSON.stringify(dataBeds)}`)
+
+          log(`data leitos: ${dataBeds.cd_leito}, inpatientUnit_id: ${dataBeds.inpatientUnit_id}`)
+
+          const dataHospitalBed =
+          await new HospitalBedsController().show({
+            i_code: dataBeds.cd_leito,
+            inpatient_unit_id: dataBeds.inpatientUnit_id
+          })
+
+          if (!dataHospitalBed)
+            await new HospitalBedsController().store({
+              i_code: dataBeds.cd_leito,
+              description: dataBeds.ds_leito,
+              inpatient_unit_id: dataBeds.inpatientUnit_id,
+              cd_type_accomodation: dataBeds.cd_tip_acomodacao,
+              ds_type_accomodation: dataBeds.ds_tip_acomodacao,
+              type_ocuppation: dataBeds.tp_ocupacao,
+              abstract_description: dataBeds.ds_resumo_leito,
+              is_active: dataBeds.sn_ativo
+            })
+
+      } catch (error) {
+        log(`error leito: ${error.message}`)
+      }
+    }
+
+
+
+    return true
+
   }
 }

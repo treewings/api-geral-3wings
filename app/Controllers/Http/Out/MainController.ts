@@ -13,11 +13,9 @@ export default class MainController{
     const log = Log('out:main')
     try {
 
-
-
       // #region ctx
       const {
-        nr_attendance,
+        i_code,
         company_id,
         consult
       } = request.body()
@@ -54,10 +52,10 @@ export default class MainController{
         )
       }
 
-      if (!nr_attendance){
+      if (!i_code){
         return response.status(500).json(
           {
-            message: `nr_attendance is required`,
+            message: `i_code is required`,
           }
         )
       }
@@ -75,7 +73,7 @@ export default class MainController{
       // #region GetData
       const retDataService = await new GetDataService().index({
         company_id,
-        nr_attendance,
+        i_code,
         consult,
       })
       // #endregion GetData

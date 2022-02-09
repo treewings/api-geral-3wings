@@ -15,7 +15,7 @@ export default class GetDataController {
 
     const dataC = {
       company_id: data.company_id,
-      nr_attendance: data.nr_attendance,
+      i_code: data.i_code,
       consult: data.consult,
     }
 
