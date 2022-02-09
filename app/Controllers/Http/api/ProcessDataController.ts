@@ -14,7 +14,6 @@ export default class ProcessDataController {
     const log = Log('processData:attendance')
     try {
 
-
       log(`Init`)
 
       const {
@@ -387,32 +386,31 @@ export default class ProcessDataController {
 
         let sector_id: any;
 
-        const dataSector =
-          await new SectorsController().show({
+        const storeSector =
+          await new SectorsController().storeOrUpdate({
             i_code: sector.cd_setor,
-            company_id: dataCompany.id
+            company_id: dataCompany.id,
+            description: sector.ds_setor,
+            is_active:
+              sector.sn_ativo == `S` ||
+              sector.sn_ativo == `true` ||
+              sector.sn_ativo == true
+              ? true : false,
           })
 
-        if (!dataSector) {
-          const storeSector =
-            await new SectorsController().store({
-              i_code: sector.cd_setor,
-              company_id: dataCompany.id,
-              description: sector.ds_setor,
-            })
+          if (storeSector)
+          sector_id = storeSector.id
 
-            if (storeSector)
-            sector_id = storeSector.id
 
-        }else{
-            sector_id = dataSector.id
-        }
-
-        //log(`setor: ${sector_id}`)
+        log(`setor: ${sector_id}`)
 
         if (sector.hasOwnProperty(`unidades_internacao`)){
-          sector.sector_id = sector_id
-          objData.push(sector)
+          objData.push({
+            unidades_internacao: sector.unidades_internacao,
+            sector_id,
+            cd_setor: sector.cd_setor,
+          })
+
         }
 
       } catch (error) {
@@ -426,13 +424,8 @@ export default class ProcessDataController {
     let objInpatient: any[] = [];
 
     // function for execute the generation and map the inpatientUnit
-    async function* genInpatients(){
+    async function* genInpatients(objData){
       for (const sector of objData){
-
-
-
-        let arr: any [] = [];
-        let ret: any;
 
         if (sector.unidades_internacao)
           sector.unidades_internacao.sector_id = sector.sector_id
@@ -440,22 +433,17 @@ export default class ProcessDataController {
 
           if (Array.isArray(sector.unidades_internacao.unidade_internacao)){
 
-            sector.unidades_internacao.unidade_internacao.forEach(element => {
-                arr.push({
-                  unidade_internacao: element,
-                  sector_id: sector.sector_id,
-                  cd_setor: sector.cd_setor
-                })
-            });
-
-            ret = arr
-            //log(`genInpatients: ${JSON.stringify(arr)}`)
+            for await (let element of sector.unidades_internacao.unidade_internacao){
+              yield {
+                unidade_internacao: element,
+                sector_id: sector.sector_id,
+                cd_setor: sector.cd_setor
+              }
+            }
 
           }else{
-            ret = sector.unidades_internacao;
+            yield sector.unidades_internacao;
           }
-
-        yield ret;
 
       }
     }
@@ -486,20 +474,30 @@ export default class ProcessDataController {
               arrBed.push({
                 inpatientUnit_id: inpatientsFor.inpatientUnit_id,
                 cd_leito: element.cd_leito,
-                description: element.ds_leito,
+                ds_leito: element.ds_leito,
                 inpatient_unit_id: element.inpatientUnit_id,
-                cd_type_accomodation: element.cd_tip_acomodacao,
-                ds_type_accomodation: element.ds_tip_acomodacao,
-                type_ocuppation: element.tp_ocupacao,
-                abstract_description: element.ds_resumo_leito,
-                is_active: element.sn_ativo
+                cd_tip_acomodacao: element.cd_tip_acomodacao,
+                ds_tip_acomodacao: element.ds_tip_acomodacao,
+                tp_ocupacao: element.tp_ocupacao,
+                ds_resumo_leito: element.ds_resumo_leito,
+                sn_ativo: element.sn_ativo
               })
             }
 
+
+          }else{
+            arrBed.push({
+                inpatientUnit_id: inpatientsFor.inpatientUnit_id,
+                cd_leito: inpatientsFor.leito.cd_leito,
+                ds_leito: inpatientsFor.leito.ds_leito,
+                inpatient_unit_id: inpatientsFor.leito.inpatientUnit_id,
+                cd_tip_acomodacao: inpatientsFor.leito.cd_tip_acomodacao,
+                ds_tip_acomodacao: inpatientsFor.leito.ds_tip_acomodacao,
+                tp_ocupacao: inpatientsFor.leito.leitoment.tp_ocupacao,
+                ds_resumo_leito: inpatientsFor.leito.ds_resumo_leito,
+                sn_ativo: inpatientsFor.leito.sn_ativo
+            })
           }
-          // }else{
-          //   return inpatientsFor.leito;
-          // }
 
 
         }
@@ -510,7 +508,7 @@ export default class ProcessDataController {
       return arrBed;
     }
 
-    for await (let dataInpatientsFor of genInpatients()){
+    for await (let dataInpatientsFor of genInpatients(objData)){
 
       try {
 
@@ -523,26 +521,21 @@ export default class ProcessDataController {
           let inpatientUnit_id;
           log(`data unid int: ${dataInpatientsFor.unidade_internacao.cd_unid_int}, sector_id: ${dataInpatientsFor.sector_id} cd_setor: ${dataInpatientsFor.cd_setor}`)
 
-          const dataInpatientUnit =
-          await new InpatientUnitsController().show({
-            i_code: dataInpatientsFor.unidade_internacao.cd_unid_int,
-            sector_id: dataInpatientsFor.sector_id,
-          })
-
-          if (!dataInpatientUnit) {
           const storeInpatientUnit =
-            await new InpatientUnitsController().store({
+            await new InpatientUnitsController().storeOrUpdate({
               i_code: dataInpatientsFor.unidade_internacao.cd_unid_int,
               sector_id: dataInpatientsFor.sector_id,
               description: dataInpatientsFor.unidade_internacao.ds_unid_int,
+              is_active:
+                dataInpatientsFor.unidade_internacao.sn_ativo == `S` ||
+                dataInpatientsFor.unidade_internacao.sn_ativo == `true` ||
+                dataInpatientsFor.unidade_internacao.sn_ativo == true
+                ? true : false,
             })
 
             if (storeInpatientUnit)
               inpatientUnit_id = storeInpatientUnit.id
 
-          }else{
-            inpatientUnit_id = dataInpatientUnit.id
-          }
 
           if (dataInpatientsFor.unidade_internacao.hasOwnProperty(`leitos`)){
             dataInpatientsFor.unidade_internacao.leitos.inpatientUnit_id = inpatientUnit_id
@@ -555,43 +548,32 @@ export default class ProcessDataController {
 
     }
 
-    //log(`objInpatient: ${JSON.stringify(objInpatient)}`)
-
     const retFncBeds = await fncBeds(objInpatient);
-
-    //log(`retFncBeds: ${JSON.stringify(retFncBeds)}`)
 
     for await (const dataBeds of retFncBeds){
       try {
 
-       // log(`data leitos: ${JSON.stringify(dataBeds)}`)
+        log(`data leitos: ${dataBeds.cd_leito}, inpatientUnit_id: ${dataBeds.inpatientUnit_id} ,cd_tip_acomodacao: ${dataBeds.cd_tip_acomodacao}`)
 
-          log(`data leitos: ${dataBeds.cd_leito}, inpatientUnit_id: ${dataBeds.inpatientUnit_id}`)
-
-          const dataHospitalBed =
-          await new HospitalBedsController().show({
-            i_code: dataBeds.cd_leito,
-            inpatient_unit_id: dataBeds.inpatientUnit_id
-          })
-
-          if (!dataHospitalBed)
-            await new HospitalBedsController().store({
-              i_code: dataBeds.cd_leito,
-              description: dataBeds.ds_leito,
-              inpatient_unit_id: dataBeds.inpatientUnit_id,
-              cd_type_accomodation: dataBeds.cd_tip_acomodacao,
-              ds_type_accomodation: dataBeds.ds_tip_acomodacao,
-              type_ocuppation: dataBeds.tp_ocupacao,
-              abstract_description: dataBeds.ds_resumo_leito,
-              is_active: dataBeds.sn_ativo
-            })
+        await new HospitalBedsController().storeOrUpdate({
+          i_code: dataBeds.cd_leito,
+          description: dataBeds.ds_leito,
+          inpatient_unit_id: dataBeds.inpatientUnit_id,
+          cd_type_accomodation: dataBeds.cd_tip_acomodacao,
+          ds_type_accomodation: dataBeds.ds_tip_acomodacao,
+          type_ocuppation: dataBeds.tp_ocupacao,
+          abstract_description: dataBeds.ds_resumo_leito,
+          is_active:
+            dataBeds.sn_ativo == `S` ||
+            dataBeds.sn_ativo == `true` ||
+            dataBeds.sn_ativo == true
+            ? true : false,
+        })
 
       } catch (error) {
         log(`error leito: ${error.message}`)
       }
     }
-
-
 
     return true
 

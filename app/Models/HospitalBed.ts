@@ -15,7 +15,7 @@ export default class HospitalBed extends BaseModel {
   public description: string
 
   @column()
-  public is_active: string
+  public is_active: boolean
 
   @column()
   public cd_type_accomodation: string

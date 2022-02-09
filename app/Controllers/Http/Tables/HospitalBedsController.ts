@@ -20,9 +20,34 @@ export default class HospitalBedsController {
       type_ocuppation: data.type_ocuppation,
       cd_type_accomodation: data.cd_type_accomodation,
       ds_type_accomodation: data.ds_type_accomodation,
+      is_active: data.is_active,
      });
 
      return iData.$isPersisted ? iData: false;
+  }
+
+  public async storeOrUpdate(data: IHospitalBedStore) {
+
+    const searchPayload = {
+      i_code: data.i_code,
+      inpatient_unit_id: data.inpatient_unit_id,
+    }
+
+    const persistancePayload = {
+      i_code: data.i_code,
+      description: data.description,
+      inpatient_unit_id: data.inpatient_unit_id,
+      abstract_description: data.abstract_description,
+      type_ocuppation: data.type_ocuppation,
+      cd_type_accomodation: data.cd_type_accomodation,
+      ds_type_accomodation: data.ds_type_accomodation,
+      is_active: data.is_active,
+    }
+
+    const ret =
+    await HospitalBedtModel.updateOrCreate(searchPayload, persistancePayload);
+
+    return ret.$isPersisted ? ret : false
   }
 
   public async show(data: IHospitalBedShow) {

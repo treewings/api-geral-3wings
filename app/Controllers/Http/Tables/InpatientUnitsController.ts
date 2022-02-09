@@ -15,10 +15,31 @@ export default class InpatientUnitsController {
     const iData = await InpatientUnitModel.create({
       i_code: data.i_code,
       description: data.description,
-      sector_id: data.sector_id
+      sector_id: data.sector_id,
+      is_active: data.is_active,
      });
 
      return iData.$isPersisted ? iData: false;
+  }
+
+  public async storeOrUpdate(data: IInpatientUnitStore) {
+
+    const searchPayload = {
+      i_code: data.i_code,
+      sector_id: data.sector_id,
+    }
+
+    const persistancePayload = {
+      i_code: data.i_code,
+      description: data.description,
+      sector_id: data.sector_id,
+      is_active: data.is_active,
+    }
+
+    const ret =
+    await InpatientUnitModel.updateOrCreate(searchPayload, persistancePayload);
+
+    return ret.$isPersisted ? ret : false
   }
 
   public async show(data: IInpatientUnitShow) {

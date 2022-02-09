@@ -15,10 +15,32 @@ export default class SectorsController {
     const iData = await SectorModel.create({
       i_code: data.i_code,
       description: data.description,
-      company_id: data.company_id
+      company_id: data.company_id,
+      is_active: data.is_active,
      });
 
      return iData.$isPersisted ? iData: false;
+  }
+
+  public async storeOrUpdate(data: ISectorStore) {
+
+    const searchPayload = {
+      i_code: data.i_code,
+      company_id: data.company_id,
+    }
+
+    const persistancePayload = {
+      i_code: data.i_code,
+      description: data.description,
+      company_id: data.company_id,
+      is_active: data.is_active,
+    }
+
+    const ret =
+      await SectorModel.updateOrCreate(searchPayload, persistancePayload);
+
+    return ret.$isPersisted ? ret : false
+
   }
 
   public async show(data: ISectorShow) {

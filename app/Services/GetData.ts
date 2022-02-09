@@ -69,7 +69,8 @@ export default class GetData {
 
           returnDataXml = ret.Envelope.Body;
 
-          const keyString: any = 'SetoresResponse.SetoresResult';
+          const keyString: any = dataConfigApi.data_field;
+          //const keyString: any = 'AtendimentoResponse.AtendimentoResult';
 
           returnDataXml =
             !keyString
@@ -398,9 +399,8 @@ export default class GetData {
       .then( async (res) => {
         if (res.status === 200) {
 
-          const keyString: any = 'message';
-
-
+          //const keyString: any = 'message';
+          const keyString: any = dataConfigApi.data_field;
 
           returnData =
             !keyString
