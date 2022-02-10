@@ -56,12 +56,12 @@ export interface IDataGetTables{
     setor:{
       cd_setor: string;
       ds_setor: string;
-      sn_setor: string;
+      sn_ativo_setor: string;
       unidades_internacao:{
         unidade_internacao: {
           cd_unid_int: string;
           ds_unid_int: string;
-          sn_ativo: string;
+          sn_ativo_unidade_internacao: string;
           leitos:{
             leito: {
               cd_leito: string;
@@ -70,7 +70,7 @@ export interface IDataGetTables{
               ds_tip_acomodacao: string;
               ds_resumo_leito: string;
               tp_ocupacao: string;
-              sn_ativo: string;
+              sn_ativo_leito: string;
             }
           }
         }

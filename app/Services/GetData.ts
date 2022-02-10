@@ -1,6 +1,5 @@
 import axios from 'axios'
 import builder from 'xmlbuilder'
-//import xmlParser from 'xml2js'
 import Moment from 'moment'
 import Log from 'debug'
 
@@ -13,6 +12,7 @@ import CompaniesController from 'App/Controllers/Http/Tables/CompaniesController
 import AttendancesController from 'App/Controllers/Http/Tables/AttendancesController'
 import ExternalApis from 'App/Controllers/Http/Tables/ExternalApisController'
 
+// helpers
 import Helpers from 'App/Helpers/Index'
 
 export default class GetData {
@@ -94,103 +94,8 @@ export default class GetData {
           }
 
         if (data.consult === `attendance`){
-          const {
-            paciente: {
-              cd_paciente,
-              nm_paciente,
-              dt_nascimento,
-              sn_vip,
-              telefone
-            },
-            atendimento: {
-              tp_atendimento,
-              dt_atendimento,
-              hr_atendimento,
-              dt_alta,
-              hr_alta,
-              origem: {
-                cd_ori_ate,
-                ds_ori_ate,
-                tp_origem
-              },
-              setor: {
-                cd_setor,
-                ds_setor
-              },
-              unidade_internacao: {
-                cd_unid_int,
-                ds_unid_int
-              },
-              convenio: {
-                cd_convenio,
-                nm_convenio
-              },
-              leito: {
-                cd_leito,
-                ds_leito,
-                ds_resumo_leito,
-                tp_ocupacao
-              }
-            }
-          } = ret.Envelope.Body.AtendimentoResponse.AtendimentoResult
 
-          let startDateFormated: string =
-            Moment(dt_atendimento).format(`YYYY-MM-DD`);
-
-          let startHourFormated: string =
-            Moment(hr_atendimento).format(`HH:mm:ss`);
-
-          let endDateFormated = dt_alta != '' ?
-            Moment(dt_alta).format(`YYYY-MM-DD`) : null;
-
-          let endHourFormated = dt_alta != '' ?
-            Moment(hr_alta).format(`HH:mm:ss`) : null;
-
-          let birthDateFormated =
-            Moment(dt_nascimento).format(`YYYY-MM-DD HH:mm:ss`);
-
-          let snVip = sn_vip == `S` ? true : false;
-
-          let formatedRet = {
-            dataOrigin: `External API`,
-            paciente: {
-              cd_paciente,
-              nm_paciente,
-              dt_nascimento: birthDateFormated,
-              sn_vip: snVip,
-              telefone
-            },
-            atendimento: {
-              tp_atendimento,
-              dt_atendimento: startDateFormated,
-              hr_atendimento: startHourFormated,
-              dt_alta: endDateFormated,
-              hr_alta: endHourFormated,
-              origem: {
-                cd_ori_ate,
-                ds_ori_ate,
-                tp_origem
-              },
-              setor: {
-                cd_setor,
-                ds_setor
-              },
-              unidade_internacao: {
-                cd_unid_int,
-                ds_unid_int
-              },
-              convenio: {
-                cd_convenio,
-                nm_convenio
-              },
-              leito: {
-                cd_leito,
-                ds_leito,
-                ds_resumo_leito,
-                tp_ocupacao
-              }
-            }
-          };
+          let formatedRet = await new Helpers().formatObject(returnDataXml, `attendance`)
 
           log('Yep! Get data attendance of external API')
           return {
@@ -199,10 +104,13 @@ export default class GetData {
           };
 
         }else if (data.consult === 'tables'){
+
+          let formatedRet = await new Helpers().formatObject(returnDataXml, `tables`)
+
           log('Yep! Get data tables of external API')
           return {
             status: 200,
-            Body: ret
+            Body: formatedRet
           };
         }
 
@@ -424,120 +332,28 @@ export default class GetData {
 
           //log(`Return Data (tables, JSON): ${JSON.stringify(returnData)}`)
 
-          let ret: any = res.data
+          //let ret: any = res.data
 
-        if (data.consult === `attendance`){
-          const {
-            paciente: {
-              cd_paciente,
-              nm_paciente,
-              dt_nascimento,
-              sn_vip,
-              telefone
-            },
-            atendimento: {
-              tp_atendimento,
-              dt_atendimento,
-              hr_atendimento,
-              dt_alta,
-              hr_alta,
-              origem: {
-                cd_ori_ate,
-                ds_ori_ate,
-                tp_origem
-              },
-              setor: {
-                cd_setor,
-                ds_setor
-              },
-              unidade_internacao: {
-                cd_unid_int,
-                ds_unid_int
-              },
-              convenio: {
-                cd_convenio,
-                nm_convenio
-              },
-              leito: {
-                cd_leito,
-                ds_leito,
-                ds_resumo_leito,
-                tp_ocupacao
-              }
-            }
-          } = ret.message
+          if (data.consult === `attendance`){
 
-          let startDateFormated: string =
-            Moment(dt_atendimento).format(`YYYY-MM-DD`);
+            let formatedRet = await new Helpers().formatObject(returnData, `attendance`)
 
-          let startHourFormated: string =
-            Moment(hr_atendimento).format(`HH:mm:ss`);
+            log('Yep! Get data attendance of external API')
+            return {
+              status: 200,
+              Body: formatedRet
+            };
 
-          let endDateFormated = dt_alta != '' ?
-            Moment(dt_alta).format(`YYYY-MM-DD`) : null;
+          }else if (data.consult === 'tables'){
 
-          let endHourFormated = dt_alta != '' ?
-            Moment(hr_alta).format(`HH:mm:ss`) : null;
+            let formatedRet = await new Helpers().formatObject(returnData, `tables`)
 
-          let birthDateFormated =
-            Moment(dt_nascimento).format(`YYYY-MM-DD HH:mm:ss`);
-
-          let snVip = sn_vip == `S` ? true : false;
-
-          let formatedRet = {
-            dataOrigin: `External API`,
-            paciente: {
-              cd_paciente,
-              nm_paciente,
-              dt_nascimento: birthDateFormated,
-              sn_vip: snVip,
-              telefone
-            },
-            atendimento: {
-              tp_atendimento,
-              dt_atendimento: startDateFormated,
-              hr_atendimento: startHourFormated,
-              dt_alta: endDateFormated,
-              hr_alta: endHourFormated,
-              origem: {
-                cd_ori_ate,
-                ds_ori_ate,
-                tp_origem
-              },
-              setor: {
-                cd_setor,
-                ds_setor
-              },
-              unidade_internacao: {
-                cd_unid_int,
-                ds_unid_int
-              },
-              convenio: {
-                cd_convenio,
-                nm_convenio
-              },
-              leito: {
-                cd_leito,
-                ds_leito,
-                ds_resumo_leito,
-                tp_ocupacao
-              }
-            }
-          };
-
-          log('Yep! Get data attendance of external API')
-          return {
-            status: 200,
-            Body: formatedRet
-          };
-
-        }else if (data.consult === 'tables'){
-          log('Yep! Get data tables of external API')
-          return {
-            status: 200,
-            Body: ret
-          };
-        }
+            log('Yep! Get data tables of external API')
+            return {
+              status: 200,
+              Body: formatedRet
+            };
+          }
 
 
       }
