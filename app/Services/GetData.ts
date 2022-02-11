@@ -10,6 +10,7 @@ import { IGetData, IDataGetAttendance, IDataGetTables } from 'App/Interfaces/ISe
 import ProcessDataController from 'App/Controllers/Http/api/ProcessDataController'
 import CompaniesController from 'App/Controllers/Http/Tables/CompaniesController'
 import AttendancesController from 'App/Controllers/Http/Tables/AttendancesController'
+import SectorsController from 'App/Controllers/Http/Tables/SectorsController'
 import ExternalApis from 'App/Controllers/Http/Tables/ExternalApisController'
 
 // helpers
@@ -122,118 +123,152 @@ export default class GetData {
 
         // procurando dados na base local
         try {
-          const attendanceLocal = await new AttendancesController().showFromCompany({
-            company_id: data.company_id,
-            i_code: data.i_code.toString(),
-          });
+          if (data.consult == `attendance`){
+            const attendanceLocal = await new AttendancesController().showFromCompany({
+              company_id: data.company_id,
+              i_code: data.i_code.toString(),
+            });
 
-          if (!attendanceLocal){
-            log(`Record not found from the internal database`)
+            if (!attendanceLocal){
+              log(`Record not found from the internal database`)
+              return {
+                status: 404,
+                Body: {error: `Record not found from the internal database`}
+              };
+            }
+
+            const {
+              type: tp_atendimento,
+              start_date: dt_atendimento,
+              end_date: dt_alta,
+              client: {
+                i_code: cd_paciente,
+                name: nm_paciente,
+                birth_date: dt_nascimento,
+                is_vip: sn_vip,
+                phone_number: telefone
+              },
+              origin: {
+                i_code: cd_ori_ate,
+                description: ds_ori_ate,
+                type: tp_origem
+              },
+              sector: {
+                i_code: cd_setor,
+                description: ds_setor
+              },
+              inpatient_unit: {
+                i_code: cd_unid_int,
+                description: ds_unid_int
+              },
+              health_insurance: {
+                i_code: cd_convenio,
+                description: nm_convenio
+              },
+              hospital_bed: {
+                i_code: cd_leito,
+                description: ds_leito,
+                abstract_description: ds_resumo_leito,
+                type_ocuppation: tp_ocupacao
+              }
+            } = attendanceLocal
+
+            let startDateFormated: string =
+              Moment(dt_atendimento).format(`YYYY-MM-DD`);
+
+            let startHourFormated: string =
+              Moment(dt_atendimento).format(`HH:mm:ss`);
+
+            let endDateFormated = dt_alta != null ?
+              Moment(dt_alta).format(`YYYY-MM-DD`) : null;
+
+            let endHourFormated = dt_alta != null ?
+              Moment(dt_alta).format(`HH:mm:ss`) : null;
+
+            let birthDateFormated =
+              Moment(dt_nascimento).format(`YYYY-MM-DD HH:mm:ss`);
+
+            let snVip = sn_vip == false ? false : true;
+
+            let objAttendance = {
+              dataOrigin: `Local database`,
+                  paciente: {
+                    cd_paciente,
+                    nm_paciente,
+                    dt_nascimento: birthDateFormated,
+                    sn_vip: snVip,
+                    telefone
+                  },
+                  atendimento: {
+                    tp_atendimento,
+                    dt_atendimento: startDateFormated,
+                    hr_atendimento: startHourFormated,
+                    dt_alta: endDateFormated,
+                    hr_alta: endHourFormated,
+                    origem: {
+                      cd_ori_ate,
+                      ds_ori_ate,
+                      tp_origem
+                    },
+                    setor: {
+                      cd_setor,
+                      ds_setor
+                    },
+                    unidade_internacao: {
+                      cd_unid_int,
+                      ds_unid_int
+                    },
+                    convenio: {
+                      cd_convenio,
+                      nm_convenio
+                    },
+                    leito: {
+                      cd_leito,
+                      ds_leito,
+                      ds_resumo_leito,
+                      tp_ocupacao
+                    }
+                  }
+            }
+
+            log('Yep! Get data of internal database')
             return {
-              status: 404,
-              Body: {error: `Record not found from the internal database`}
+              status: 200,
+              Body: objAttendance
+            };
+          }else if (data.consult == `tables`){
+
+             const tablesLocal = await new SectorsController().showFromCompany(
+              { company_id: data.company_id }
+            );
+
+            if (!tablesLocal){
+              log(`Record not found from the internal database`)
+              return {
+                status: 404,
+                Body: {error: `Record not found from the internal database`}
+              };
+            }
+
+            //const retTranslate = await new Helpers().translateObjectTables(tablesLocal)
+            //log(`retTranslate: ${JSON.stringify(retTranslate)}`)
+
+            return {
+              status: 200,
+              Body: {
+                dataOrigin: `Local database`,
+                sectors: tablesLocal
+              }
+            };
+
+          }else{
+
+            return {
+              status: 500,
+              Body: 'param consult not found'
             };
           }
 
-          const {
-            type: tp_atendimento,
-            start_date: dt_atendimento,
-            end_date: dt_alta,
-            client: {
-              i_code: cd_paciente,
-              name: nm_paciente,
-              birth_date: dt_nascimento,
-              is_vip: sn_vip,
-              phone_number: telefone
-            },
-            origin: {
-              i_code: cd_ori_ate,
-              description: ds_ori_ate,
-              type: tp_origem
-            },
-            sector: {
-              i_code: cd_setor,
-              description: ds_setor
-            },
-            inpatient_unit: {
-              i_code: cd_unid_int,
-              description: ds_unid_int
-            },
-            health_insurance: {
-              i_code: cd_convenio,
-              description: nm_convenio
-            },
-            hospital_bed: {
-              i_code: cd_leito,
-              description: ds_leito,
-              abstract_description: ds_resumo_leito,
-              type_ocuppation: tp_ocupacao
-            }
-          } = attendanceLocal
-
-          let startDateFormated: string =
-            Moment(dt_atendimento).format(`YYYY-MM-DD`);
-
-          let startHourFormated: string =
-            Moment(dt_atendimento).format(`HH:mm:ss`);
-
-          let endDateFormated = dt_alta != null ?
-            Moment(dt_alta).format(`YYYY-MM-DD`) : null;
-
-          let endHourFormated = dt_alta != null ?
-            Moment(dt_alta).format(`HH:mm:ss`) : null;
-
-          let birthDateFormated =
-            Moment(dt_nascimento).format(`YYYY-MM-DD HH:mm:ss`);
-
-          let snVip = sn_vip == false ? false : true;
-
-          let objAttendance = {
-            dataOrigin: `Local database`,
-                paciente: {
-                  cd_paciente,
-                  nm_paciente,
-                  dt_nascimento: birthDateFormated,
-                  sn_vip: snVip,
-                  telefone
-                },
-                atendimento: {
-                  tp_atendimento,
-                  dt_atendimento: startDateFormated,
-                  hr_atendimento: startHourFormated,
-                  dt_alta: endDateFormated,
-                  hr_alta: endHourFormated,
-                  origem: {
-                    cd_ori_ate,
-                    ds_ori_ate,
-                    tp_origem
-                  },
-                  setor: {
-                    cd_setor,
-                    ds_setor
-                  },
-                  unidade_internacao: {
-                    cd_unid_int,
-                    ds_unid_int
-                  },
-                  convenio: {
-                    cd_convenio,
-                    nm_convenio
-                  },
-                  leito: {
-                    cd_leito,
-                    ds_leito,
-                    ds_resumo_leito,
-                    tp_ocupacao
-                  }
-                }
-          }
-
-          log('Yep! Get data of internal database')
-          return {
-            status: 200,
-            Body: objAttendance
-          };
 
         } catch (error) {
           log(`Error message when trying to get information from the internal database: ${error.message}`)

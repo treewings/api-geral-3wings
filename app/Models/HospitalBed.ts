@@ -35,7 +35,7 @@ export default class HospitalBed extends BaseModel {
   @belongsTo(() => InpatientUnit, {
     foreignKey: 'inpatient_unit_id'
   })
-  public sector: BelongsTo<typeof InpatientUnit>
+  public inpatientUnit: BelongsTo<typeof InpatientUnit>
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime

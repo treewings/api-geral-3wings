@@ -4,7 +4,7 @@ import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import HospitalBedtModel from 'App/Models/HospitalBed'
 
 // Interface
-import { IHospitalBedShow, IHospitalBedStore } from 'App/Interfaces/IHospitalBed'
+import { IHospitalBedShow, IHospitalBedShowFromSectorCompany, IHospitalBedStore } from 'App/Interfaces/IHospitalBed'
 
 export default class HospitalBedsController {
   public async index({}: HttpContextContract) {}
@@ -57,6 +57,19 @@ export default class HospitalBedsController {
       .where('i_code', data.i_code)
       .where('inpatient_unit_id', data.inpatient_unit_id)
       .first()
+
+    return sData ? sData : false
+  }
+
+  public async showFromSectorCompany(data: IHospitalBedShowFromSectorCompany) {
+    const sData =
+    await HospitalBedtModel
+      .query()
+      .preload('inpatientUnit', (inpatientUnit) => {
+        inpatientUnit.preload('sector', (query) => {
+          query.where('company_id', data.company_id)
+        })
+      })
 
     return sData ? sData : false
   }

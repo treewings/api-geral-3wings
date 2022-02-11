@@ -27,13 +27,14 @@ export default class Sector extends BaseModel {
   public company: BelongsTo<typeof Company>
 
   @hasMany(() => InPatientUnitModel, {
-    foreignKey: 'inpatient_unit_id'
+    foreignKey: 'sector_id'
   })
-  public inpatient_unit: HasMany<typeof InPatientUnitModel>
+  public inpatient_units: HasMany<typeof InPatientUnitModel>
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime
+
 }

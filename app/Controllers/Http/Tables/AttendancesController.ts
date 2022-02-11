@@ -30,6 +30,33 @@ export default class AttendancesController {
     return iData.$isPersisted ? iData : false;
   }
 
+  public async storeOrUpdate(data: IAttendanceStore) {
+
+    const searchPayload = {
+      i_code: data.i_code,
+      client_id: data.client_id,
+    }
+
+    const persistancePayload = {
+      client_id: data.client_id,
+      start_date: data.start_date,
+      end_date: data.end_date,
+      i_code: data.i_code,
+      origin_id: data.origin_id,
+      sector_id: data.sector_id,
+      type: data.type,
+      inpatient_unit_id: data.inpatient_unit_id,
+      health_insurance_id: data.health_insurance_id,
+      hospital_bed_id: data.hospital_bed_id,
+      company_id: data.company_id
+    }
+
+    const ret =
+    await AttendanceModel.updateOrCreate(searchPayload, persistancePayload);
+
+    return ret.$isPersisted ? ret : false
+  }
+
   public async show(data: IAttendanceShow) {
     const sData =
     await AttendanceModel

@@ -306,7 +306,7 @@ export default class ProcessDataController {
         } else {
 
           const updateDataAttendance =
-            await new AttendancesController().update({
+            await new AttendancesController().storeOrUpdate({
               i_code: i_code_attendance,
               client_id: objAttendance.client_id,
               end_date: endDateFormated,

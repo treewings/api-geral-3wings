@@ -1,8 +1,9 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo, BelongsTo } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, column, belongsTo, BelongsTo, hasMany, HasMany } from '@ioc:Adonis/Lucid/Orm'
 
 // #models
 import Sector from 'App/Models/Sector'
+import HospitalBed from 'App/Models/HospitalBed'
 
 export default class InpatientUnit extends BaseModel {
   @column({ isPrimary: true })
@@ -24,6 +25,11 @@ export default class InpatientUnit extends BaseModel {
     foreignKey: 'sector_id'
   })
   public sector: BelongsTo<typeof Sector>
+
+  @hasMany(() => HospitalBed, {
+    foreignKey: 'inpatient_unit_id'
+  })
+  public beds: HasMany<typeof HospitalBed>
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime

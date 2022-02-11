@@ -1,10 +1,10 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-
 // Models
 import SectorModel from 'App/Models/Sector'
 
 // Interface
 import { ISectorShow, ISectorStore  } from 'App/Interfaces/ISector'
+import Database from '@ioc:Adonis/Lucid/Database';
 
 export default class SectorsController {
   public async index({}: HttpContextContract) {}
@@ -50,6 +50,30 @@ export default class SectorsController {
       .where('i_code', data.i_code)
       .where('company_id', data.company_id)
       .first()
+
+    return sData ? sData : false
+  }
+
+  public async showFromCompany(data: { company_id: number }) {
+    const sData =
+    await SectorModel
+      .query()
+      .where('company_id', data.company_id)
+      .preload('inpatient_units', (inpatients) => {
+        inpatients.preload('beds', (beds) => {
+          beds.select(
+            "i_code",
+            "description",
+            "is_active",
+            "cd_type_accomodation",
+            "ds_type_accomodation",
+            "abstract_description",
+            "type_ocuppation",
+          )
+        })
+        .select('id', 'i_code', 'description', 'is_active')
+      })
+      .select('id', 'i_code', 'description', 'is_active')
 
     return sData ? sData : false
   }

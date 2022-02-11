@@ -25,6 +25,12 @@ export interface IHospitalBedShow{
   inpatient_unit_id: number;
 }
 
+export interface IHospitalBedShowFromSectorCompany{
+  company_id: number;
+}
+
+
+
 
 
 

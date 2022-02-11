@@ -224,6 +224,83 @@ export default class Helpers{
 
   }
 
+  /**
+   * @param object object for interface
+   * @return object translate
+  **/
+  public async translateObjectTables(object:any){
+
+    async function genInfos(obj){
+
+      let mainArray: any[] = []
+      let inpatientArray: any[] = []
+      let bedsArray: any[] = []
+      let s = 0
+      let i = 0
+      let l = 0
+
+      for await (let iSector of obj) {
+        s = s + 1
+        const element = iSector;
+
+        if (Array.isArray(element.inpatient_units)){
+          for await (let indexInpatient of element.inpatient_units) {
+            const elementInpatient = indexInpatient;
+            i = i + 1
+            if (Array.isArray(elementInpatient.beds)){
+              for await (let index of elementInpatient.beds) {
+                l = l + 1
+                const elementBeds = index;
+
+                bedsArray.push({
+                  cd_leito: elementBeds.i_code,
+                  ds_leito: elementBeds.description,
+                })
+
+                index = null;
+              }
+            }
+
+            inpatientArray.push({
+              cd_unid_int: elementInpatient.i_code,
+              ds_unid_int: elementInpatient.description,
+              sn_ativo: elementInpatient.is_active,
+              leitos: {
+                leito: bedsArray
+              }
+            })
+
+            indexInpatient = null
+
+          }
+        }
+
+
+        mainArray.push({
+          cd_setor: element.i_code,
+          ds_setor: element.description,
+          sn_ativo: element.is_active,
+          unidades_internacao: {
+            unidade_internacao: inpatientArray
+          }
+        })
+
+        iSector = null
+
+
+
+      }
+
+      console.log(`s: ${s}, i: ${i}, l: ${l}`)
+
+      return mainArray
+
+    }
+
+    return genInfos(object)
+
+  }
+
 
 
 }
