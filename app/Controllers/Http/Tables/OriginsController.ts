@@ -22,6 +22,28 @@ export default class OriginsController {
      return iData.$isPersisted ? iData: false;
   }
 
+
+  public async storeOrUpdate(data: IOriginStore) {
+
+    const searchPayload = {
+      i_code: data.i_code,
+      company_id: data.company_id,
+    }
+
+    const persistancePayload = {
+      i_code: data.i_code,
+      description: data.description,
+      company_id: data.company_id,
+      type: data.type,
+    }
+
+    const ret =
+      await OriginModel.updateOrCreate(searchPayload, persistancePayload);
+
+    return ret.$isPersisted ? ret : false
+
+  }
+
   public async show(data: IOriginShow) {
     const sData =
       await OriginModel

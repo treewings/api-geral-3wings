@@ -70,10 +70,12 @@ export default class SectorsController {
             "abstract_description",
             "type_ocuppation",
           )
+          //.where('inpatient_unit_id', 'inpatient_unit.id')
         })
         .select('id', 'i_code', 'description', 'is_active')
       })
       .select('id', 'i_code', 'description', 'is_active')
+
 
     return sData ? sData : false
   }

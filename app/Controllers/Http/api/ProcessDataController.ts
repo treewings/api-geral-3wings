@@ -14,7 +14,7 @@ export default class ProcessDataController {
     const log = Log('processData:attendance')
     try {
 
-      log(`Init`)
+      log(`Init proceessData:attendance`)
 
       const {
         paciente: {
@@ -78,18 +78,10 @@ export default class ProcessDataController {
       }
 
       let returnClient;
-
-
-      const dataClient = await new ClientsController().show({
-        i_code: i_code_client, company_id: dataCompany.id
-      })
-
-      if (!dataClient) {
-
+      //#region client
         let snVip = is_vip == `S` ? true : false;
-        log(`client not exists, creating`)
         returnClient =
-          await new ClientsController().store({
+          await new ClientsController().storeOrUpdate({
             birth_date,
             i_code: i_code_client,
             is_vip: snVip,
@@ -97,11 +89,6 @@ export default class ProcessDataController {
             phone_number,
             company_id: dataCompany.id
           })
-      } else {
-        log(`client exist, continue`)
-        returnClient = dataClient;
-      }
-
       //#endregion client
 
       //#region store attendance
@@ -109,77 +96,48 @@ export default class ProcessDataController {
         objAttendance.client_id = returnClient.id
 
         // #region origin
-        const dataOrigin =
-          await new OriginsController().show({
+        const createDataOrigin =
+          await new OriginsController().storeOrUpdate({
             i_code: i_code_origin,
-            company_id: dataCompany.id
+            company_id: dataCompany.id,
+            description: ds_origin,
+            type: type_origin
           })
 
-        if (!dataOrigin) {
-          const createDataOrigin =
-            await new OriginsController().store({
-              i_code: i_code_origin,
-              company_id: dataCompany.id,
-              description: ds_origin,
-              type: type_origin
-            })
-
-          if (!createDataOrigin) {
-            return {
-              status: 500,
-              message: 'Error in creating Origin'
-            }
+        if (!createDataOrigin) {
+          return {
+            status: 500,
+            message: 'Error in creating Origin'
           }
-
-          objAttendance.origin_id = createDataOrigin.id
-          objAttendance.operations.origin = 'create'
-
-        } else {
-          objAttendance.origin_id = dataOrigin.id
         }
+
+        objAttendance.origin_id = createDataOrigin.id
         // #endregion origin
 
         // #region health insurance
-        const dataHealthInsurance =
-          await new HealthInsurancesController().show({
+
+        const createDataHealthInsurance =
+          await new HealthInsurancesController().storeOrUpdate({
             i_code: i_code_health_insurance,
-            company_id: dataCompany.id
+            company_id: dataCompany.id,
+            description: ds_health_insurance,
           })
 
-        if (!dataHealthInsurance) {
-          const createDataHealthInsurance =
-            await new HealthInsurancesController().store({
-              i_code: i_code_health_insurance,
-              company_id: dataCompany.id,
-              description: ds_health_insurance,
-            })
-
-          if (!createDataHealthInsurance) {
-            return {
-              status: 500,
-              message: 'Error in creating Health Insurance'
-            }
+        if (!createDataHealthInsurance) {
+          return {
+            status: 500,
+            message: 'Error in creating Health Insurance'
           }
-
-          objAttendance.heathInsurance_id = createDataHealthInsurance.id
-          objAttendance.operations.healthInsurance = 'create'
-
-        } else {
-          objAttendance.heathInsurance_id = dataHealthInsurance.id
         }
+
+        objAttendance.heathInsurance_id = createDataHealthInsurance.id
 
         // #endregion health insurance
 
         // #region sector
-        const dataSector =
-          await new SectorsController().show({
-            i_code: i_code_sector,
-            company_id: dataCompany.id
-          })
 
-        if (!dataSector) {
           const createDataSector =
-            await new SectorsController().store({
+            await new SectorsController().storeOrUpdate({
               i_code: i_code_sector,
               company_id: dataCompany.id,
               description: ds_sector,
@@ -193,22 +151,13 @@ export default class ProcessDataController {
           }
 
           objAttendance.sector_id = createDataSector.id
-          objAttendance.operations.sector = 'create'
-        } else {
-          objAttendance.sector_id = dataSector.id
-        }
 
         // #endregion sector
 
         // #region inpatientUnit
-        const dataImpatientUnit =
-          await new InpatientUnitsController().show({
-            i_code: i_code_inpatient_unit, sector_id: objAttendance.sector_id
-          })
 
-        if (!dataImpatientUnit) {
           const createDataImpatientUnit =
-            await new InpatientUnitsController().store({
+            await new InpatientUnitsController().storeOrUpdate({
               i_code: i_code_inpatient_unit,
               sector_id: objAttendance.sector_id,
               description: ds_inpatient_unit,
@@ -222,23 +171,13 @@ export default class ProcessDataController {
           }
 
           objAttendance.inpatientUnit_id = createDataImpatientUnit.id
-          objAttendance.operations.inpatientUnit = 'create'
 
-        } else {
-          objAttendance.inpatientUnit_id = dataImpatientUnit.id
-        }
         // #endregion inpatientUnit
 
         // #region hospital bed
-        const dataHospitalBed =
-          await new HospitalBedsController().show({
-            i_code: i_code_hospital_bed,
-            inpatient_unit_id: objAttendance.inpatientUnit_id
-          })
 
-        if (!dataHospitalBed) {
           const createDataHospitalBed =
-            await new HospitalBedsController().store({
+            await new HospitalBedsController().storeOrUpdate({
               i_code: i_code_hospital_bed,
               description: ds_hospital_bed,
               inpatient_unit_id: objAttendance.inpatientUnit_id,
@@ -256,56 +195,19 @@ export default class ProcessDataController {
           }
 
           objAttendance.hospitalBed_id = createDataHospitalBed.id
-          objAttendance.operations.hospitalBed = 'create'
-
-        } else {
-          objAttendance.hospitalBed_id = dataHospitalBed.id
-        }
 
         // #endregion hospital bed
 
         // #region attendance
-        const dataAttendance =
-          await new AttendancesController().show({
-            i_code: i_code_attendance,
-            client_id: objAttendance.client_id
-          })
 
         // format date attendance
-
         let startDateFormated: string =
           Moment(start_date).format(`YYYY-MM-DD`) + ` ` + Moment(start_hour).format(`HH:mm:ss`)
 
         let endDateFormated = end_date != '' ?
           Moment(end_date).format(`YYYY-MM-DD`) + ` ` + Moment(end_hour).format(`HH:mm:ss`) : null
 
-        if (!dataAttendance) {
-
-          const createDataAttendance =
-            await new AttendancesController().store({
-              i_code: i_code_attendance,
-              client_id: objAttendance.client_id,
-              end_date: endDateFormated,
-              start_date: startDateFormated,
-              sector_id: objAttendance.sector_id,
-              origin_id: objAttendance.origin_id,
-              type: type_attendance,
-              inpatient_unit_id: objAttendance.inpatientUnit_id,
-              hospital_bed_id: objAttendance.hospitalBed_id,
-              health_insurance_id: objAttendance.heathInsurance_id,
-              company_id: dataCompany.id
-            })
-
-          if (!createDataAttendance) {
-            return {
-              status: 500,
-              message: 'Error in creating attendance'
-            }
-          }
-
-        } else {
-
-          const updateDataAttendance =
+          const storeOrupdateDataAttendance =
             await new AttendancesController().storeOrUpdate({
               i_code: i_code_attendance,
               client_id: objAttendance.client_id,
@@ -320,7 +222,7 @@ export default class ProcessDataController {
               company_id: dataCompany.id,
             })
 
-          if (!updateDataAttendance) {
+          if (!storeOrupdateDataAttendance) {
             return {
               status: 500,
               message: 'Error in updating attendance'
@@ -329,32 +231,12 @@ export default class ProcessDataController {
 
           objAttendance.operations.attendance = 'update'
 
-        }
-
         // #endregion attendance
 
-        // #region return
         log(`Data return: ${JSON.stringify(data)}`)
-        return {
-          status: 'success',
-          // message: {
-          //   attendance: {
-          //   received_code: i_code_attendance,
-          //   operation: objAttendance.operations.attendance,
-          //   operation_tables: {
-          //     origin: objAttendance.operations.origin,
-          //     healthInsurance: objAttendance.operations.healthInsurance,
-          //     sector: objAttendance.operations.sector,
-          //     inpatientUnit:objAttendance.operations.inpatientUnit,
-          //     hospitalBed: objAttendance.operations.hospitalBed,
-          //     }
-          //   },
-          // }
-          message: data
 
-        };
+        return true;
 
-        // #endregion return
         //#endregion store attendance
       }
 

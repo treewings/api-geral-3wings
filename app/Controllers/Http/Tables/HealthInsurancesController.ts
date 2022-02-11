@@ -21,6 +21,26 @@ export default class HealthInsurancesController {
      return iData.$isPersisted ? iData: false;
   }
 
+  public async storeOrUpdate(data: IHealthInsuranceStore) {
+
+    const searchPayload = {
+      i_code: data.i_code,
+      company_id: data.company_id,
+    }
+
+    const persistancePayload = {
+      i_code: data.i_code,
+      description: data.description,
+      company_id: data.company_id
+    }
+
+    const ret =
+      await HealthInsuranceModel.updateOrCreate(searchPayload, persistancePayload);
+
+    return ret.$isPersisted ? ret : false
+
+  }
+
   public async show(data: IHealthInsuranceShow) {
     const sData =
     await HealthInsuranceModel

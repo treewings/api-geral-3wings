@@ -25,6 +25,29 @@ export default class ClientsController {
     return iData.$isPersisted ? iData : false;
   }
 
+  public async storeOrUpdate(data: IClientStore) {
+
+    const searchPayload = {
+      i_code: data.i_code,
+      company_id: data.company_id,
+    }
+
+    const persistancePayload = {
+      company_id: data.company_id,
+      birth_date: data.birth_date,
+      i_code: data.i_code,
+      is_vip: data.is_vip,
+      name: data.name,
+      phone_number: data.phone_number
+    }
+
+    const ret =
+      await ClientsModel.updateOrCreate(searchPayload, persistancePayload);
+
+    return ret.$isPersisted ? ret : false
+
+  }
+
   public async show(data: IClientShow) {
     const sData =
       await ClientsModel

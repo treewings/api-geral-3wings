@@ -250,14 +250,16 @@ export default class GetData {
               };
             }
 
-            //const retTranslate = await new Helpers().translateObjectTables(tablesLocal)
+            const retTranslate = await new Helpers().translateObjectTables(tablesLocal)
             //log(`retTranslate: ${JSON.stringify(retTranslate)}`)
 
             return {
               status: 200,
               Body: {
                 dataOrigin: `Local database`,
-                sectors: tablesLocal
+                setores: {
+                  setor: retTranslate
+                }
               }
             };
 

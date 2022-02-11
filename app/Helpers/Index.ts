@@ -1,7 +1,7 @@
 import xmlParser from 'xml2js'
 import Moment from 'moment'
 
-export default class Helpers{
+export default class Helpers {
 
   /**
    * @param object Objeto original
@@ -9,17 +9,17 @@ export default class Helpers{
   **/
   public getObjectsValueByStringKey(object: object, keyString: string): any {
     return [object].concat(
-      keyString.split('.')).reduce(function(a, b: any) {
+      keyString.split('.')).reduce(function (a, b: any) {
         return a[b]
       }
-    )
+      )
 
   }
 
   /**
    * @param stringValue string que deseja converter em objeto
   **/
-  public async parseStringXml(stringValue: string){
+  public async parseStringXml(stringValue: string) {
 
     const options = {
       tagNameProcessors: [xmlParser.processors.stripPrefix],
@@ -46,8 +46,8 @@ export default class Helpers{
    * @param type type of interface ( attendance or tables )
    * @return object
   **/
-  public async formatObject(object: any, type: string){
-    if (type == `attendance`){
+  public async formatObject(object: any, type: string) {
+    if (type == `attendance`) {
       const {
         paciente: {
           cd_paciente,
@@ -89,7 +89,7 @@ export default class Helpers{
       } = object
 
       let startDateFormated: string =
-      Moment(dt_atendimento).format(`YYYY-MM-DD`);
+        Moment(dt_atendimento).format(`YYYY-MM-DD`);
 
       let startHourFormated: string =
         Moment(hr_atendimento).format(`HH:mm:ss`);
@@ -148,7 +148,7 @@ export default class Helpers{
 
       return formatedRet;
 
-    }else if (type == `tables`){
+    } else if (type == `tables`) {
       object.dataOrigin = `External API`;
       return object
 
@@ -228,72 +228,83 @@ export default class Helpers{
    * @param object object for interface
    * @return object translate
   **/
-  public async translateObjectTables(object:any){
+  public async translateObjectTables(object: any) {
 
-    async function genInfos(obj){
+    async function genInfos(obj) {
 
       let mainArray: any[] = []
       let inpatientArray: any[] = []
       let bedsArray: any[] = []
-      let s = 0
-      let i = 0
-      let l = 0
+      let newObjInpatient = {};
+      let newObjBeds = {};
+      let newObjSector = {};
 
       for await (let iSector of obj) {
-        s = s + 1
+
         const element = iSector;
 
-        if (Array.isArray(element.inpatient_units)){
+        if (element.inpatient_units.length > 0) {
           for await (let indexInpatient of element.inpatient_units) {
             const elementInpatient = indexInpatient;
-            i = i + 1
-            if (Array.isArray(elementInpatient.beds)){
+            if (elementInpatient.beds.length > 0) {
               for await (let index of elementInpatient.beds) {
-                l = l + 1
+
                 const elementBeds = index;
 
                 bedsArray.push({
                   cd_leito: elementBeds.i_code,
                   ds_leito: elementBeds.description,
+                  cd_tip_acomodacao: elementBeds.cd_type_accomodation,
+                  ds_tip_acomodacao: elementBeds.ds_type_accomodation,
+                  ds_resumo_leito: elementBeds.abstract_description,
+                  tp_ocupacao: elementBeds.type_ocuppation,
+                  sn_ativo: elementBeds.is_active == 1 ? 'true' : 'false',
                 })
 
-                index = null;
+                newObjBeds = {
+                  leito: bedsArray
+                }
+
               }
+            } else {
+              newObjBeds = []
             }
+
+            bedsArray = []
 
             inpatientArray.push({
               cd_unid_int: elementInpatient.i_code,
               ds_unid_int: elementInpatient.description,
-              sn_ativo: elementInpatient.is_active,
-              leitos: {
-                leito: bedsArray
-              }
+              sn_ativo: elementInpatient.is_active == 1 ? 'true' : 'false',
+              leitos: newObjBeds
             })
 
-            indexInpatient = null
-
+            newObjInpatient = {
+              unidade_internacao: inpatientArray
+            }
           }
+        } else {
+          newObjInpatient = []
+          console.log(`setor sem unid int: ${element.i_code}`)
         }
+
+
+        inpatientArray = []
 
 
         mainArray.push({
           cd_setor: element.i_code,
           ds_setor: element.description,
-          sn_ativo: element.is_active,
-          unidades_internacao: {
-            unidade_internacao: inpatientArray
-          }
+          sn_ativo: element.is_active == 1 ? 'true' : 'false',
+          unidades_internacao: newObjInpatient
         })
 
-        iSector = null
 
+        newObjSector = mainArray
 
 
       }
-
-      console.log(`s: ${s}, i: ${i}, l: ${l}`)
-
-      return mainArray
+      return newObjSector
 
     }
 
