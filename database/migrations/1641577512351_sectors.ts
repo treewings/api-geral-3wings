@@ -10,7 +10,6 @@ export default class Sectors extends BaseSchema {
       table.string('description')
       table.boolean('is_active').defaultTo(true)
       table.integer('company_id').unsigned().references('id').inTable('companies')
-
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL
        */

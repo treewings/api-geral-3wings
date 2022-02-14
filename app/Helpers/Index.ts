@@ -94,10 +94,10 @@ export default class Helpers {
       let startHourFormated: string =
         Moment(hr_atendimento).format(`HH:mm:ss`);
 
-      let endDateFormated = dt_alta != '' ?
+      let endDateFormated = dt_alta ?
         Moment(dt_alta).format(`YYYY-MM-DD`) : null;
 
-      let endHourFormated = dt_alta != '' ?
+      let endHourFormated = dt_alta ?
         Moment(hr_alta).format(`HH:mm:ss`) : null;
 
       let birthDateFormated =
@@ -151,75 +151,6 @@ export default class Helpers {
     } else if (type == `tables`) {
       object.dataOrigin = `External API`;
       return object
-
-      // const {
-      //   setores: {
-      //     setor:{
-      //       cd_setor: cd_setor,
-      //       ds_setor: ds_setor,
-      //       sn_ativo: sn_ativo_setor,
-      //       unidades_internacao: [
-      //         {
-      //           unidade_internacao: [
-      //             {
-      //               cd_unid_int: cd_unid_int,
-      //               ds_unid_int: ds_unid_int,
-      //               sn_ativo: sn_ativo_unidade_internacao,
-      //               leitos: [
-      //                 {
-      //                   leito: [
-      //                     {
-      //                       cd_leito: cd_leito,
-      //                       ds_leito: ds_leito,
-      //                       cd_tip_acomodacao: cd_tip_acomodacao,
-      //                       ds_tip_acomodacao: ds_tip_acomodacao,
-      //                       ds_resumo_leito: ds_resumo_leito,
-      //                       tp_ocupacao: tp_ocupacao,
-      //                       sn_ativo: sn_ativo_leito,
-      //                     }
-      //                   ]
-      //                 }
-      //               ]
-      //             }
-      //           ]
-      //         }
-      //       ]
-      //     }
-      //   }
-      // } = object
-
-      // return {
-      //   setores: {
-      //     setor: {
-      //       cd_setor,
-      //       ds_setor,
-      //       sn_ativo_setor,
-      //       unidades_internacao: {
-      //         unidades_internacao: [
-      //           {
-      //             cd_unid_int,
-      //             ds_unid_int,
-      //             sn_ativo_unidade_internacao,
-      //             leitos: {
-      //               leito: [
-      //                 {
-      //                   cd_leito,
-      //                   ds_leito,
-      //                   cd_tip_acomodacao,
-      //                   ds_tip_acomodacao,
-      //                   ds_resumo_leito,
-      //                   tp_ocupacao,
-      //                   sn_ativo_leito,
-      //                 }
-      //               ]
-      //             }
-      //           }
-      //         ]
-      //       }
-      //     }
-      //   }
-      // }
-
     }
 
   }
@@ -285,7 +216,6 @@ export default class Helpers {
           }
         } else {
           newObjInpatient = []
-          console.log(`setor sem unid int: ${element.i_code}`)
         }
 
 

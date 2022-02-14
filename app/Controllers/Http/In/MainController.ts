@@ -10,7 +10,7 @@ export default class MainController{
     response
   }: HttpContextContract){
 
-    const log = Log('out:main')
+    const log = Log('in:main')
     try {
 
       // #region ctx
@@ -73,7 +73,7 @@ export default class MainController{
       //#endregion validations
 
       // #region GetData
-      const retDataService = await new GetDataService().index({
+      const retDataService = await new GetDataService().showInternalData({
         company_id,
         i_code,
         consult,

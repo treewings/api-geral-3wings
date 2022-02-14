@@ -38,3 +38,13 @@ Route.post('api/out', async (ctx) => {
 
   return new MainController().index(ctx)
 })
+
+Route.post('api/in', async (ctx) => {
+
+  const { default: MainController } = await import(
+    'App/Controllers/Http/In/MainController'
+  )
+
+  return new MainController().index(ctx)
+})
+

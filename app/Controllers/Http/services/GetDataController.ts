@@ -35,4 +35,17 @@ export default class GetDataController {
     }
 
   }
+
+  public async showInternalData(data: IGetData) {
+
+    const dataC = {
+      company_id: data.company_id,
+      i_code: data.i_code,
+      consult: data.consult,
+    }
+
+    let retJson = await new GetData().internalService(dataC);
+    return retJson;
+
+  }
 }

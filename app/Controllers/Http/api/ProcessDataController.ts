@@ -204,7 +204,7 @@ export default class ProcessDataController {
         let startDateFormated: string =
           Moment(start_date).format(`YYYY-MM-DD`) + ` ` + Moment(start_hour).format(`HH:mm:ss`)
 
-        let endDateFormated = end_date != '' ?
+        let endDateFormated = end_date ?
           Moment(end_date).format(`YYYY-MM-DD`) + ` ` + Moment(end_hour).format(`HH:mm:ss`) : null
 
           const storeOrupdateDataAttendance =

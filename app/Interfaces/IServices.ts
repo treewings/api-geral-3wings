@@ -1,6 +1,6 @@
 export interface IGetData{
   company_id: number;
-  i_code: number;
+  i_code: number | null;
   consult: string;
 }
 

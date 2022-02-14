@@ -20,7 +20,7 @@ export default class AppProvider {
 
     // invoke controller for consume apis
 
-    cron.schedule('23 * * * *', async () => {
+    cron.schedule('20 * * * *', async () => {
       const { default: JobsController } = await import(
         'App/Controllers/Http/Jobs/MainController'
       )
