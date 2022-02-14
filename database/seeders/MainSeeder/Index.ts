@@ -19,5 +19,6 @@ export default class IndexSeeder extends BaseSeeder {
     //await this.runSeeder(await import('../TruncateAllTablesSeeder'))
     await this.runSeeder(await import('../CompanySeeder'))
     await this.runSeeder(await import('../ExternalApiSeeder'))
+    await this.runSeeder(await import('../JobSeeder'))
   }
 }
