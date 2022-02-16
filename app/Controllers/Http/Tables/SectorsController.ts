@@ -4,7 +4,6 @@ import SectorModel from 'App/Models/Sector'
 
 // Interface
 import { ISectorShow, ISectorStore  } from 'App/Interfaces/ISector'
-import Database from '@ioc:Adonis/Lucid/Database';
 
 export default class SectorsController {
   public async index({}: HttpContextContract) {}
